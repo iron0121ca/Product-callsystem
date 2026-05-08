@@ -99,139 +99,150 @@ const SalesEntryForm = () => {
   ];
 
   return (
-    <div style={{ padding: '20px', background: '#f0f2f5', minHeight: '100vh', width: '100%' }}>
-      <div style={{ width: '100%' }}>
-        
-        {/* Top Section: Entry Form */}
-        <Card 
-          title="Sales Entry" 
-          variant="outlined"
-          style={{ marginBottom: '24px' }}
-          styles={{ body: { background: '#f0f2f5' } }}
+    <div style={{ padding: '16px', background: '#f0f2f5', minHeight: '100vh', width: '100%' }}>
+      {/* Top Section: Entry Form */}
+      <Card 
+        title="Sales Entry" 
+        variant="outlined"
+        style={{ marginBottom: '16px', width: '100%' }}
+        styles={{ body: { background: '#f0f2f5' } }}
+      >
+        <Form 
+          form={form} 
+          layout="vertical" 
+          onFinish={onFinish}
+          initialValues={{ annual_year: '2025', car_type: 'New' }}
+          size="middle"
         >
-          <Form 
-            form={form} 
-            layout="vertical" 
-            onFinish={onFinish}
-            initialValues={{ annual_year: '2025', car_type: 'New' }}
-            size="middle"
-          >
-            {/* Row 1: Basic Info */}
-            <Row gutter={16}>
-              <Col xs={24} sm={6} md={4}>
-                <Form.Item name="annual_year" label="Annual Year" rules={[{ required: true }]}>
-                  <Select options={annualYearOptions} />
-                </Form.Item>
-              </Col>
-              <Col xs={24} sm={6} md={4}>
-                <Form.Item name="car_type" label="Condition" rules={[{ required: true }]}>
-                  <Select options={[{value:'New', label:'New'}, {value:'Used', label:'Used'}]} />
-                </Form.Item>
-              </Col>
-              <Col xs={24} sm={12} md={4}>
-                <Form.Item name="stock_number" label="Stock#" rules={[{ required: true }]}>
-                  <Input placeholder="H25XXX" />
-                </Form.Item>
-              </Col>
-              <Col xs={24} sm={24} md={12}>
-                <Form.Item name="name" label="Customer Name" rules={[{ required: true }]}>
-                  <Input placeholder="e.g. Ming Lo Kim" />
-                </Form.Item>
-              </Col>
-            </Row>
+          <Row gutter={16}>
+            <Col xs={24} sm={6} md={3}>
+              <Form.Item name="annual_year" label="Annual" rules={[{ required: true }]}>
+                <Select options={annualYearOptions} />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={6} md={3}>
+              <Form.Item name="car_type" label="Condition" rules={[{ required: true }]}>
+                <Select options={[{value:'New', label:'New'}, {value:'Used', label:'Used'}]} />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={12} md={4}>
+              <Form.Item name="stock_number" label="Stock#" rules={[{ required: true }]}>
+                <Input placeholder="H25XXX" />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={24} md={8}>
+              <Form.Item name="name" label="Customer Name" rules={[{ required: true }]}>
+                <Input placeholder="e.g. Ming Lo Kim" />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={12} md={6}>
+              <Form.Item name="contact_number" label="Contact">
+                <Input placeholder="(604) 783-6903" />
+              </Form.Item>
+            </Col>
+          </Row>
 
-            {/* Row 2: Customer & Car Detail */}
-            <Row gutter={16}>
-              <Col xs={24} sm={12} md={6}>
-                <Form.Item name="contact_number" label="Contact">
-                  <Input placeholder="(604) 783-6903" />
-                </Form.Item>
-              </Col>
-              <Col xs={12} sm={6} md={3}>
-                <Form.Item name="year" label="Year">
-                  <Select options={yearOptions} />
-                </Form.Item>
-              </Col>
-              <Col xs={12} sm={6} md={5}>
-                <Form.Item name="brand" label="Brand">
-                  <Input placeholder="Honda" />
-                </Form.Item>
-              </Col>
-              <Col xs={12} sm={12} md={5}>
-                <Form.Item name="model" label="Model">
-                  <Input placeholder="Civic" />
-                </Form.Item>
-              </Col>
-              <Col xs={12} sm={12} md={5}>
-                <Form.Item name="color" label="Color">
-                  <Input placeholder="Red" />
-                </Form.Item>
-              </Col>
-            </Row>
+          <Row gutter={16}>
+            <Col xs={12} sm={6} md={3}>
+              <Form.Item name="year" label="Year">
+                <Select options={yearOptions} />
+              </Form.Item>
+            </Col>
+            <Col xs={12} sm={6} md={4}>
+              <Form.Item name="brand" label="Brand">
+                <Input placeholder="Honda" />
+              </Form.Item>
+            </Col>
+            <Col xs={12} sm={12} md={4}>
+              <Form.Item name="model" label="Model">
+                <Input placeholder="Civic" />
+              </Form.Item>
+            </Col>
+            <Col xs={12} sm={12} md={3}>
+              <Form.Item name="color" label="Color">
+                <Input placeholder="Red" />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={8} md={3}>
+              <Form.Item name="date_of_buy" label="Buy Date">
+                <DatePicker style={{ width: '100%' }} />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={8} md={3}>
+              <Form.Item name="date_delivery" label="Deliv. Date">
+                <DatePicker style={{ width: '100%' }} />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={8} md={4}>
+              <Form.Item name="delivery_time" label="Deliv. Time">
+                <TimePicker format="HH:mm" style={{ width: '100%' }} />
+              </Form.Item>
+            </Col>
+          </Row>
 
-            {/* Row 3: Dates & Status */}
-            <Row gutter={16}>
-              <Col xs={24} sm={8} md={4}>
-                <Form.Item name="date_of_buy" label="Purchase Date">
-                  <DatePicker style={{ width: '100%' }} />
-                </Form.Item>
-              </Col>
-              <Col xs={24} sm={8} md={4}>
-                <Form.Item name="date_delivery" label="Delivery Date">
-                  <DatePicker style={{ width: '100%' }} />
-                </Form.Item>
-              </Col>
-              <Col xs={24} sm={8} md={4}>
-                <Form.Item name="delivery_time" label="Delivery Time">
-                  <TimePicker format="HH:mm" style={{ width: '100%' }} />
-                </Form.Item>
-              </Col>
-              <Col xs={24} sm={12} md={6}>
-                <Form.Item name="result" label="Status">
-                  <Select placeholder="Select Status" options={[
-                    { value: 'Gas Full', label: 'Gas Full' },
-                    { value: 'Cleaned', label: 'Cleaned' },
-                    { value: 'Delivered', label: 'Delivered' },
-                  ]} />
-                </Form.Item>
-              </Col>
-              <Col xs={24} sm={12} md={6}>
-                <Form.Item name="benefit" label="Benefit">
-                  <Select placeholder="Select Benefit" options={[
-                    { value: 'All season mat', label: 'All season mat' },
-                    { value: 'Trunk tray', label: 'Trunk tray' },
-                    { value: 'Oil change service', label: 'Oil change service' },
-                  ]} />
-                </Form.Item>
-              </Col>
-            </Row>
+          <Row gutter={16}>
+            <Col xs={24} sm={12} md={6}>
+              <Form.Item name="result" label="Status">
+                <Select placeholder="Select Status" options={[
+                  { value: 'Gas Full', label: 'Gas Full' },
+                  { value: 'Cleaned', label: 'Cleaned' },
+                  { value: 'Delivered', label: 'Delivered' },
+                ]} />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={12} md={6}>
+              <Form.Item name="benefit" label="Benefit">
+                <Select placeholder="Select Benefit" options={[
+                  { value: 'All season mat', label: 'All season mat' },
+                  { value: 'Trunk tray', label: 'Trunk tray' },
+                  { value: 'Oil change service', label: 'Oil change service' },
+                ]} />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={24} md={12}>
+              <Form.Item name="part_incentive" label="Remarks">
+                <Input placeholder="e.g. Mention 2 oil changes to manager..." />
+              </Form.Item>
+            </Col>
+          </Row>
 
-            <Form.Item name="part_incentive" label="Remarks / Instructions">
-              <Input.TextArea rows={2} placeholder="e.g. Mention 2 oil changes to manager..." />
-            </Form.Item>
+          <Form.Item style={{ marginBottom: 0 }}>
+            <Button type="primary" htmlType="submit" size="large" block loading={loading}>
+              Submit Record
+            </Button>
+          </Form.Item>
+        </Form>
+      </Card>
 
-            <Form.Item>
-              <Button type="primary" htmlType="submit" size="large" block loading={loading}>
-                Submit to Database
-              </Button>
-            </Form.Item>
-          </Form>
-        </Card>
-
-        {/* Bottom Section: Data List */}
-        <Card title="Recent Records" variant="outlined">
+      {/* Bottom Section: Data Table with horizontal scroll and sticky header */}
+      <Card 
+        title="Recent Records" 
+        variant="outlined" 
+        styles={{ body: { padding: 0 } }}
+        style={{ width: '100%' }}
+      >
+        <div style={{ width: '100%', overflowX: 'auto' }}>
           <Table 
             dataSource={dataList} 
-            columns={columns} 
+            columns={columns.map(col => ({
+              ...col,
+              onCell: () => ({
+                style: { whiteSpace: 'nowrap' },
+              }),
+              onHeaderCell: () => ({
+                style: { whiteSpace: 'nowrap' },
+              }),
+            }))} 
             rowKey={(record, index) => record.id || index} 
             loading={tableLoading}
-            pagination={{ pageSize: 15 }}
+            pagination={{ pageSize: 20 }}
             size="small"
             bordered
+            sticky
+            scroll={{ x: 'max-content' }}
           />
-        </Card>
-
-      </div>
+        </div>
+      </Card>
     </div>
   );
 };
