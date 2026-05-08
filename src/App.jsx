@@ -99,12 +99,12 @@ const SalesEntryForm = () => {
   ];
 
   return (
-    <div style={{ padding: '16px', background: '#f0f2f5', minHeight: '100vh', width: '100%' }}>
+    <div style={{ padding: '8px', background: '#f0f2f5', minHeight: '100vh', width: '100%' }}>
       {/* Top Section: Entry Form */}
       <Card 
         title="Sales Entry" 
         variant="outlined"
-        style={{ marginBottom: '16px', width: '100%' }}
+        style={{ marginBottom: '8px', width: '100%' }}
         styles={{ body: { background: '#f0f2f5' } }}
       >
         <Form 
