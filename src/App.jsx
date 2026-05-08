@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { 
   Form, Input, Button, DatePicker, TimePicker, 
-  Select, InputNumber, message, Card, Space, Table, Tag 
+  Select, InputNumber, message, Card, Space, Table, Tag, Row, Col
 } from 'antd';
 import dayjs from 'dayjs';
 
@@ -15,14 +15,25 @@ const SalesEntryForm = () => {
   const [dataList, setDataList] = useState([]); // 存放从数据库读取的数据列表
   const [tableLoading, setTableLoading] = useState(false);
 
-  // --- 新增：从数据库获取数据的函数 ---
+  // --- 生成年份选项 ---
+  const annualYearOptions = Array.from({ length: 2050 - 2024 + 1 }, (_, i) => {
+    const year = 2024 + i;
+    return { value: year.toString(), label: `${year}年` };
+  });
+
+  const yearOptions = Array.from({ length: 2030 - 1900 + 1 }, (_, i) => {
+    const year = 1900 + i;
+    return { value: year.toString(), label: `${year}年` };
+  });
+
+  // --- 从数据库获取数据的函数 ---
   const fetchData = async () => {
     setTableLoading(true);
     try {
       const { data, error } = await supabase
         .from('sales_records')
         .select('*')
-        .order('created_at', { ascending: false }); // 最新的排在最前面
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       setDataList(data);
@@ -33,7 +44,6 @@ const SalesEntryForm = () => {
     }
   };
 
-  // --- 新增：初始化页面时读取数据 ---
   useEffect(() => {
     fetchData();
   }, []);
@@ -41,7 +51,6 @@ const SalesEntryForm = () => {
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      // 格式化日期和时间
       const dataToSubmit = {
         ...values,
         date_of_buy: values.date_of_buy?.format('YYYY-MM-DD'),
@@ -57,8 +66,6 @@ const SalesEntryForm = () => {
 
       message.success('数据已成功同步到系统！');
       form.resetFields();
-      
-      // --- 新增：提交成功后立即刷新列表 ---
       fetchData(); 
       
     } catch (error) {
@@ -68,13 +75,12 @@ const SalesEntryForm = () => {
     }
   };
 
-  // --- 新增：定义表格的列结构 ---
   const columns = [
     { 
-      title: '类型', 
-      dataIndex: 'type', 
-      key: 'type',
-      render: (text) => <Tag color={text === 'Delivered' ? 'green' : 'blue'}>{text}</Tag>
+      title: '年度', 
+      dataIndex: 'annual_year', 
+      key: 'annual_year',
+      render: (text) => <Tag color="blue">{text}年</Tag>
     },
     { title: 'Stock#', dataIndex: 'stock_number', key: 'stock_number' },
     { title: '客户姓名', dataIndex: 'name', key: 'name' },
@@ -85,101 +91,135 @@ const SalesEntryForm = () => {
 
   return (
     <div style={{ padding: '20px', background: '#f0f2f5', minHeight: '100vh' }}>
-      <Space direction="vertical" size="large" style={{ display: 'flex', maxWidth: 1000, margin: '0 auto' }}>
-        
-        {/* 上部分：录入表单 */}
-        <Card title="汽车销售/交付信息录入" variant="outlined">
-          <Form 
-            form={form} 
-            layout="vertical" 
-            onFinish={onFinish}
-            initialValues={{ type: 'Delivery', car_type: 'New' }}
+      <Row gutter={[24, 24]}>
+        {/* 左侧/上方：录入表单 */}
+        <Col xs={24} lg={10}>
+          <Card 
+            title="汽车销售/交付信息录入" 
+            variant="outlined"
+            styles={{ body: { background: '#f0f2f5' } }}
           >
-            {/* 第一行：基本分类 */}
-            <Space size="large" wrap>
-              <Form.Item name="type" label="类型" rules={[{ required: true }]}>
-                <Select options={[{value:'Delivery', label:'Delivery'}, {value:'Delivered', label:'Delivered'}]} style={{ width: 120 }} />
-              </Form.Item>
-              <Form.Item name="car_type" label="车况" rules={[{ required: true }]}>
-                <Select options={[{value:'New', label:'New'}, {value:'Used', label:'Used'}]} style={{ width: 120 }} />
-              </Form.Item>
-              <Form.Item name="stock_number" label="Stock#" rules={[{ required: true }]}>
-                <Input placeholder="H25XXX" />
-              </Form.Item>
-            </Space>
+            <Form 
+              form={form} 
+              layout="vertical" 
+              onFinish={onFinish}
+              initialValues={{ annual_year: '2025', car_type: 'New' }}
+            >
+              <Row gutter={16}>
+                <Col span={8}>
+                  <Form.Item name="annual_year" label="年度" rules={[{ required: true }]}>
+                    <Select options={annualYearOptions} placeholder="选择年度" />
+                  </Form.Item>
+                </Col>
+                <Col span={8}>
+                  <Form.Item name="car_type" label="车况" rules={[{ required: true }]}>
+                    <Select options={[{value:'New', label:'New'}, {value:'Used', label:'Used'}]} />
+                  </Form.Item>
+                </Col>
+                <Col span={8}>
+                  <Form.Item name="stock_number" label="Stock#" rules={[{ required: true }]}>
+                    <Input placeholder="H25XXX" />
+                  </Form.Item>
+                </Col>
+              </Row>
 
-            {/* 第二行：客户信息 */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
-              <Form.Item name="name" label="客户姓名" rules={[{ required: true }]}>
-                <Input placeholder="例如: Ming Lo Kim" />
-              </Form.Item>
-              <Form.Item name="contact_number" label="联系电话">
-                <Input placeholder="(604) 783-6903" />
-              </Form.Item>
-            </div>
+              <Row gutter={16}>
+                <Col span={12}>
+                  <Form.Item name="name" label="客户姓名" rules={[{ required: true }]}>
+                    <Input placeholder="例如: Ming Lo Kim" />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item name="contact_number" label="联系电话">
+                    <Input placeholder="(604) 783-6903" />
+                  </Form.Item>
+                </Col>
+              </Row>
 
-            {/* 第三行：车辆信息 */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '16px' }}>
-              <Form.Item name="year" label="年份">
-                <InputNumber placeholder="2025" style={{ width: '100%' }} />
-              </Form.Item>
-              <Form.Item name="brand" label="品牌">
-                <Input placeholder="Honda" />
-              </Form.Item>
-              <Form.Item name="model" label="型号">
-                <Input placeholder="Civic" />
-              </Form.Item>
-              <Form.Item name="color" label="颜色">
-                <Input placeholder="Red" />
-              </Form.Item>
-            </div>
+              <Row gutter={16}>
+                <Col span={6}>
+                  <Form.Item name="year" label="年份">
+                    <Select options={yearOptions} placeholder="选择年份" />
+                  </Form.Item>
+                </Col>
+                <Col span={6}>
+                  <Form.Item name="brand" label="品牌">
+                    <Input placeholder="Honda" />
+                  </Form.Item>
+                </Col>
+                <Col span={6}>
+                  <Form.Item name="model" label="型号">
+                    <Input placeholder="Civic" />
+                  </Form.Item>
+                </Col>
+                <Col span={6}>
+                  <Form.Item name="color" label="颜色">
+                    <Input placeholder="Red" />
+                  </Form.Item>
+                </Col>
+              </Row>
 
-            {/* 第四行：时间相关 */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '16px' }}>
-              <Form.Item name="date_of_buy" label="购买日期">
-                <DatePicker style={{ width: '100%' }} />
+              <Row gutter={16}>
+                <Col span={8}>
+                  <Form.Item name="date_of_buy" label="购买日期">
+                    <DatePicker style={{ width: '100%' }} />
+                  </Form.Item>
+                </Col>
+                <Col span={8}>
+                  <Form.Item name="date_delivery" label="交付日期">
+                    <DatePicker style={{ width: '100%' }} />
+                  </Form.Item>
+                </Col>
+                <Col span={8}>
+                  <Form.Item name="delivery_time" label="交付时间">
+                    <TimePicker format="HH:mm" style={{ width: '100%' }} />
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              <Form.Item name="result" label="结果/状态 (Result)">
+                <Select placeholder="选择状态" options={[
+                  { value: '加油', label: '加油' },
+                  { value: '清洁', label: '清洁' },
+                  { value: '已交付', label: '已交付' },
+                ]} />
               </Form.Item>
-              <Form.Item name="date_delivery" label="交付日期">
-                <DatePicker style={{ width: '100%' }} />
+
+              <Form.Item name="benefit" label="福利 (Benefit)">
+                <Select placeholder="选择福利" options={[
+                  { value: 'All season mat', label: 'All season mat' },
+                  { value: 'Trunk tray', label: 'Trunk tray' },
+                  { value: 'Oil change service', label: 'Oil change service' },
+                ]} />
               </Form.Item>
-              <Form.Item name="delivery_time" label="交付时间">
-                <TimePicker format="HH:mm" style={{ width: '100%' }} />
+
+              <Form.Item name="part_incentive" label="备注/交代 (Part Incentive)">
+                <Input.TextArea rows={2} placeholder="记得跟经理交代2次机油保养..." />
               </Form.Item>
-            </div>
 
-            <Form.Item name="result" label="结果/状态 (Result)">
-              <Input placeholder="Done / 已预约..." />
-            </Form.Item>
+              <Form.Item>
+                <Button type="primary" htmlType="submit" size="large" block loading={loading}>
+                  提交到后端数据库
+                </Button>
+              </Form.Item>
+            </Form>
+          </Card>
+        </Col>
 
-            <Form.Item name="benefit" label="福利 (Benefit)">
-              <Input.TextArea rows={2} placeholder="Gas Full / Half Half..." />
-            </Form.Item>
-
-            <Form.Item name="part_incentive" label="备注/交代 (Part Incentive)">
-              <Input.TextArea rows={2} placeholder="记得跟经理交代2次机油保养..." />
-            </Form.Item>
-
-            <Form.Item>
-              <Button type="primary" htmlType="submit" size="large" block loading={loading}>
-                提交到后端数据库
-              </Button>
-            </Form.Item>
-          </Form>
-        </Card>
-
-        {/* 下部分：数据列表展示 */}
-        <Card title="最近录入记录" variant="outlined">
-          <Table 
-            dataSource={dataList} 
-            columns={columns} 
-            rowKey={(record, index) => record.id || index} 
-            loading={tableLoading}
-            pagination={{ pageSize: 10 }}
-            scroll={{ x: 'max-content' }} // 适配小屏幕滚动
-          />
-        </Card>
-
-      </Space>
+        {/* 右侧/下方：数据列表展示 */}
+        <Col xs={24} lg={14}>
+          <Card title="最近录入记录" variant="outlined">
+            <Table 
+              dataSource={dataList} 
+              columns={columns} 
+              rowKey={(record, index) => record.id || index} 
+              loading={tableLoading}
+              pagination={{ pageSize: 10 }}
+              scroll={{ x: 'max-content' }} 
+            />
+          </Card>
+        </Col>
+      </Row>
     </div>
   );
 };
