@@ -99,134 +99,139 @@ const SalesEntryForm = () => {
   ];
 
   return (
-    <div style={{ padding: '10px', background: '#f0f2f5', minHeight: '100vh', width: '100%' }}>
-      <Row gutter={[16, 16]} wrap={false}>
-        {/* Left Section: Entry Form (Narrower) */}
-        <Col flex="400px">
-          <Card 
-            title="Sales Entry" 
-            variant="outlined"
-            styles={{ body: { background: '#f0f2f5', padding: '12px' } }}
+    <div style={{ padding: '20px', background: '#f0f2f5', minHeight: '100vh', width: '100%' }}>
+      <div style={{ width: '100%' }}>
+        
+        {/* Top Section: Entry Form */}
+        <Card 
+          title="Sales Entry" 
+          variant="outlined"
+          style={{ marginBottom: '24px' }}
+          styles={{ body: { background: '#f0f2f5' } }}
+        >
+          <Form 
+            form={form} 
+            layout="vertical" 
+            onFinish={onFinish}
+            initialValues={{ annual_year: '2025', car_type: 'New' }}
+            size="middle"
           >
-            <Form 
-              form={form} 
-              layout="vertical" 
-              onFinish={onFinish}
-              initialValues={{ annual_year: '2025', car_type: 'New' }}
-              size="small"
-            >
-              <Row gutter={8}>
-                <Col span={12}>
-                  <Form.Item name="annual_year" label="Annual" rules={[{ required: true }]}>
-                    <Select options={annualYearOptions} />
-                  </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item name="car_type" label="Cond." rules={[{ required: true }]}>
-                    <Select options={[{value:'New', label:'New'}, {value:'Used', label:'Used'}]} />
-                  </Form.Item>
-                </Col>
-              </Row>
+            {/* Row 1: Basic Info */}
+            <Row gutter={16}>
+              <Col xs={24} sm={6} md={4}>
+                <Form.Item name="annual_year" label="Annual Year" rules={[{ required: true }]}>
+                  <Select options={annualYearOptions} />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={6} md={4}>
+                <Form.Item name="car_type" label="Condition" rules={[{ required: true }]}>
+                  <Select options={[{value:'New', label:'New'}, {value:'Used', label:'Used'}]} />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={12} md={4}>
+                <Form.Item name="stock_number" label="Stock#" rules={[{ required: true }]}>
+                  <Input placeholder="H25XXX" />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={24} md={12}>
+                <Form.Item name="name" label="Customer Name" rules={[{ required: true }]}>
+                  <Input placeholder="e.g. Ming Lo Kim" />
+                </Form.Item>
+              </Col>
+            </Row>
 
-              <Form.Item name="stock_number" label="Stock#" rules={[{ required: true }]}>
-                <Input placeholder="H25XXX" />
-              </Form.Item>
+            {/* Row 2: Customer & Car Detail */}
+            <Row gutter={16}>
+              <Col xs={24} sm={12} md={6}>
+                <Form.Item name="contact_number" label="Contact">
+                  <Input placeholder="(604) 783-6903" />
+                </Form.Item>
+              </Col>
+              <Col xs={12} sm={6} md={3}>
+                <Form.Item name="year" label="Year">
+                  <Select options={yearOptions} />
+                </Form.Item>
+              </Col>
+              <Col xs={12} sm={6} md={5}>
+                <Form.Item name="brand" label="Brand">
+                  <Input placeholder="Honda" />
+                </Form.Item>
+              </Col>
+              <Col xs={12} sm={12} md={5}>
+                <Form.Item name="model" label="Model">
+                  <Input placeholder="Civic" />
+                </Form.Item>
+              </Col>
+              <Col xs={12} sm={12} md={5}>
+                <Form.Item name="color" label="Color">
+                  <Input placeholder="Red" />
+                </Form.Item>
+              </Col>
+            </Row>
 
-              <Form.Item name="name" label="Customer Name" rules={[{ required: true }]}>
-                <Input placeholder="e.g. Ming Lo Kim" />
-              </Form.Item>
+            {/* Row 3: Dates & Status */}
+            <Row gutter={16}>
+              <Col xs={24} sm={8} md={4}>
+                <Form.Item name="date_of_buy" label="Purchase Date">
+                  <DatePicker style={{ width: '100%' }} />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={8} md={4}>
+                <Form.Item name="date_delivery" label="Delivery Date">
+                  <DatePicker style={{ width: '100%' }} />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={8} md={4}>
+                <Form.Item name="delivery_time" label="Delivery Time">
+                  <TimePicker format="HH:mm" style={{ width: '100%' }} />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={12} md={6}>
+                <Form.Item name="result" label="Status">
+                  <Select placeholder="Select Status" options={[
+                    { value: 'Gas Full', label: 'Gas Full' },
+                    { value: 'Cleaned', label: 'Cleaned' },
+                    { value: 'Delivered', label: 'Delivered' },
+                  ]} />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={12} md={6}>
+                <Form.Item name="benefit" label="Benefit">
+                  <Select placeholder="Select Benefit" options={[
+                    { value: 'All season mat', label: 'All season mat' },
+                    { value: 'Trunk tray', label: 'Trunk tray' },
+                    { value: 'Oil change service', label: 'Oil change service' },
+                  ]} />
+                </Form.Item>
+              </Col>
+            </Row>
 
-              <Form.Item name="contact_number" label="Contact">
-                <Input placeholder="(604) 783-6903" />
-              </Form.Item>
+            <Form.Item name="part_incentive" label="Remarks / Instructions">
+              <Input.TextArea rows={2} placeholder="e.g. Mention 2 oil changes to manager..." />
+            </Form.Item>
 
-              <Row gutter={8}>
-                <Col span={12}>
-                  <Form.Item name="year" label="Year">
-                    <Select options={yearOptions} />
-                  </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item name="color" label="Color">
-                    <Input placeholder="Red" />
-                  </Form.Item>
-                </Col>
-              </Row>
+            <Form.Item>
+              <Button type="primary" htmlType="submit" size="large" block loading={loading}>
+                Submit to Database
+              </Button>
+            </Form.Item>
+          </Form>
+        </Card>
 
-              <Row gutter={8}>
-                <Col span={12}>
-                  <Form.Item name="brand" label="Brand">
-                    <Input placeholder="Honda" />
-                  </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item name="model" label="Model">
-                    <Input placeholder="Civic" />
-                  </Form.Item>
-                </Col>
-              </Row>
+        {/* Bottom Section: Data List */}
+        <Card title="Recent Records" variant="outlined">
+          <Table 
+            dataSource={dataList} 
+            columns={columns} 
+            rowKey={(record, index) => record.id || index} 
+            loading={tableLoading}
+            pagination={{ pageSize: 15 }}
+            size="small"
+            bordered
+          />
+        </Card>
 
-              <Row gutter={8}>
-                <Col span={12}>
-                  <Form.Item name="date_of_buy" label="Purchase Date">
-                    <DatePicker style={{ width: '100%' }} />
-                  </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item name="date_delivery" label="Delivery Date">
-                    <DatePicker style={{ width: '100%' }} />
-                  </Form.Item>
-                </Col>
-              </Row>
-
-              <Form.Item name="delivery_time" label="Delivery Time">
-                <TimePicker format="HH:mm" style={{ width: '100%' }} />
-              </Form.Item>
-
-              <Form.Item name="result" label="Status">
-                <Select options={[
-                  { value: 'Gas Full', label: 'Gas Full' },
-                  { value: 'Cleaned', label: 'Cleaned' },
-                  { value: 'Delivered', label: 'Delivered' },
-                ]} />
-              </Form.Item>
-
-              <Form.Item name="benefit" label="Benefit">
-                <Select options={[
-                  { value: 'All season mat', label: 'All season mat' },
-                  { value: 'Trunk tray', label: 'Trunk tray' },
-                  { value: 'Oil change service', label: 'Oil change service' },
-                ]} />
-              </Form.Item>
-
-              <Form.Item name="part_incentive" label="Remarks">
-                <Input.TextArea rows={2} />
-              </Form.Item>
-
-              <Form.Item>
-                <Button type="primary" htmlType="submit" block loading={loading}>
-                  Submit
-                </Button>
-              </Form.Item>
-            </Form>
-          </Card>
-        </Col>
-
-        {/* Right Section: Data Table (Wide) */}
-        <Col flex="auto" style={{ overflow: 'hidden' }}>
-          <Card title="Sales Records" variant="outlined" styles={{ body: { padding: '0' } }}>
-            <Table 
-              dataSource={dataList} 
-              columns={columns} 
-              rowKey={(record, index) => record.id || index} 
-              loading={tableLoading}
-              pagination={{ pageSize: 15 }}
-              size="small"
-              bordered
-            />
-          </Card>
-        </Col>
-      </Row>
+      </div>
     </div>
   );
 };
