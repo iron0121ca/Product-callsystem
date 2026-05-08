@@ -82,11 +82,20 @@ const SalesEntryForm = () => {
       key: 'annual_year',
       render: (text) => <Tag color="blue">{text}</Tag>
     },
+    { title: 'Condition', dataIndex: 'car_type', key: 'car_type' },
     { title: 'Stock#', dataIndex: 'stock_number', key: 'stock_number' },
     { title: 'Customer Name', dataIndex: 'name', key: 'name' },
-    { title: 'Brand/Model', key: 'car', render: (record) => `${record.brand || ''} ${record.model || ''}` },
+    { title: 'Contact', dataIndex: 'contact_number', key: 'contact_number' },
+    { title: 'Year', dataIndex: 'year', key: 'year' },
+    { title: 'Brand', dataIndex: 'brand', key: 'brand' },
+    { title: 'Model', dataIndex: 'model', key: 'model' },
+    { title: 'Color', dataIndex: 'color', key: 'color' },
+    { title: 'Purchase Date', dataIndex: 'date_of_buy', key: 'date_of_buy' },
     { title: 'Delivery Date', dataIndex: 'date_delivery', key: 'date_delivery' },
+    { title: 'Delivery Time', dataIndex: 'delivery_time', key: 'delivery_time' },
     { title: 'Status', dataIndex: 'result', key: 'result' },
+    { title: 'Benefit', dataIndex: 'benefit', key: 'benefit' },
+    { title: 'Remarks', dataIndex: 'part_incentive', key: 'part_incentive', width: 200 },
   ];
 
   return (
