@@ -12,10 +12,13 @@ const supabase = createClient('https://ishyhtympjphqkaieeud.supabase.co', 'sb_pu
 
 const SalesEntryForm = () => {
   const [form] = Form.useForm();
+  const [editForm] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [dataList, setDataList] = useState([]); // Store data list from DB
   const [tableLoading, setTableLoading] = useState(false);
   const [editingKey, setEditingKey] = useState('');
+
+  const isEditing = (record) => record.id === editingKey;
 
   // --- Phone Formatting ---
   const formatPhoneNumber = (value) => {
@@ -29,30 +32,47 @@ const SalesEntryForm = () => {
     return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
   };
 
-  const handleContactChange = (e) => {
+  const handleContactChange = (e, targetForm = form) => {
     const formatted = formatPhoneNumber(e.target.value);
-    form.setFieldsValue({ contact_number: formatted });
+    targetForm.setFieldsValue({ contact_number: formatted });
   };
 
-  // --- Inline Edit Logic ---
-  const updateStockNumber = async (record, newStock) => {
-    if (record.stock_number === newStock) {
-      setEditingKey('');
-      return;
-    }
+  // --- Full Row Edit Logic ---
+  const edit = (record) => {
+    editForm.setFieldsValue({
+      ...record,
+      date_of_buy: record.date_of_buy ? dayjs(record.date_of_buy) : null,
+      date_delivery: record.date_delivery ? dayjs(record.date_delivery) : null,
+      delivery_time: record.delivery_time ? dayjs(record.delivery_time, 'HH:mm:ss') : null,
+    });
+    setEditingKey(record.id);
+  };
+
+  const cancel = () => {
+    setEditingKey('');
+  };
+
+  const save = async (id) => {
     try {
+      const row = await editForm.validateFields();
+      const dataToUpdate = {
+        ...row,
+        date_of_buy: row.date_of_buy?.format('YYYY-MM-DD'),
+        date_delivery: row.date_delivery?.format('YYYY-MM-DD'),
+        delivery_time: row.delivery_time?.format('HH:mm:ss'),
+      };
+
       const { error } = await supabase
         .from('sales_records')
-        .update({ stock_number: newStock })
-        .eq('id', record.id);
-      
+        .update(dataToUpdate)
+        .eq('id', id);
+
       if (error) throw error;
-      message.success('Stock# updated');
+      message.success('Record updated successfully');
+      setEditingKey('');
       fetchData();
     } catch (err) {
-      message.error('Update failed: ' + err.message);
-    } finally {
-      setEditingKey('');
+      message.error('Save failed: ' + err.message);
     }
   };
 
@@ -130,58 +150,200 @@ const SalesEntryForm = () => {
       title: 'Annual', 
       dataIndex: 'annual_year', 
       key: 'annual_year',
-      render: (text) => <Tag color="blue">{text}</Tag>
+      render: (text, record) => isEditing(record) ? (
+        <Form.Item name="annual_year" style={{ margin: 0 }} rules={[{ required: true }]}>
+          <Select options={annualYearOptions} size="small" style={{ width: 80 }} />
+        </Form.Item>
+      ) : <Tag color="blue">{text}</Tag>
     },
     { 
       title: 'Type', 
       dataIndex: 'type', 
       key: 'type',
-      render: (type) => {
-        let color = 'default';
-        if (type === 'Delivered') color = 'green';
-        if (type === 'Buy') color = 'orange';
-        if (type === 'Delivery') color = 'blue';
-        return <Tag color={color}>{type || 'N/A'}</Tag>;
-      }
+      render: (type, record) => isEditing(record) ? (
+        <Form.Item name="type" style={{ margin: 0 }} rules={[{ required: true }]}>
+          <Select options={[
+            { value: 'Buy', label: 'Buy' },
+            { value: 'Delivery', label: 'Delivery' },
+            { value: 'Delivered', label: 'Delivered' },
+          ]} size="small" style={{ width: 90 }} />
+        </Form.Item>
+      ) : (
+        <Tag color={type === 'Delivered' ? 'green' : type === 'Buy' ? 'orange' : 'blue'}>{type || 'N/A'}</Tag>
+      )
     },
-    { title: 'Condition', dataIndex: 'car_type', key: 'car_type' },
+    { 
+      title: 'Condition', 
+      dataIndex: 'car_type', 
+      key: 'car_type',
+      render: (text, record) => isEditing(record) ? (
+        <Form.Item name="car_type" style={{ margin: 0 }}>
+          <Select options={[{value:'New', label:'New'}, {value:'Used', label:'Used'}]} size="small" style={{ width: 80 }} />
+        </Form.Item>
+      ) : text
+    },
     { 
       title: 'Stock#', 
       dataIndex: 'stock_number', 
       key: 'stock_number',
-      render: (text, record) => {
-        const isEditing = editingKey === record.id;
-        return isEditing ? (
-          <Input 
-            defaultValue={text} 
-            autoFocus 
-            onBlur={(e) => updateStockNumber(record, e.target.value)}
-            onPressEnter={(e) => updateStockNumber(record, e.target.value)}
-            size="small"
-          />
-        ) : (
-          <div 
-            onClick={() => setEditingKey(record.id)} 
-            style={{ cursor: 'pointer', minWidth: '80px', textDecoration: 'underline dotted' }}
-          >
-            {text}
-          </div>
-        );
-      }
+      render: (text, record) => isEditing(record) ? (
+        <Form.Item name="stock_number" style={{ margin: 0 }} rules={[{ required: true }]}>
+          <Input size="small" />
+        </Form.Item>
+      ) : text
     },
-    { title: 'Customer Name', dataIndex: 'name', key: 'name' },
-    { title: 'Contact', dataIndex: 'contact_number', key: 'contact_number' },
-    { title: 'Year', dataIndex: 'year', key: 'year' },
-    { title: 'Brand', dataIndex: 'brand', key: 'brand' },
-    { title: 'Model', dataIndex: 'model', key: 'model' },
-    { title: 'Color', dataIndex: 'color', key: 'color' },
-    { title: 'Purchase Date', dataIndex: 'date_of_buy', key: 'date_of_buy' },
-    { title: 'Delivery Date', dataIndex: 'date_delivery', key: 'date_delivery' },
-    { title: 'Delivery Time', dataIndex: 'delivery_time', key: 'delivery_time' },
-    { title: 'Status', dataIndex: 'result', key: 'result' },
-    { title: 'Benefit', dataIndex: 'benefit', key: 'benefit' },
-    { title: 'Qty', dataIndex: 'benefit_qty', key: 'benefit_qty' },
-    { title: 'Remarks', dataIndex: 'part_incentive', key: 'part_incentive', width: 200 },
+    { 
+      title: 'Customer Name', 
+      dataIndex: 'name', 
+      key: 'name',
+      render: (text, record) => isEditing(record) ? (
+        <Form.Item name="name" style={{ margin: 0 }} rules={[{ required: true }]}>
+          <Input size="small" />
+        </Form.Item>
+      ) : text
+    },
+    { 
+      title: 'Contact', 
+      dataIndex: 'contact_number', 
+      key: 'contact_number',
+      render: (text, record) => isEditing(record) ? (
+        <Form.Item name="contact_number" style={{ margin: 0 }}>
+          <Input size="small" onChange={(e) => handleContactChange(e, editForm)} />
+        </Form.Item>
+      ) : text
+    },
+    { 
+      title: 'Year', 
+      dataIndex: 'year', 
+      key: 'year',
+      render: (text, record) => isEditing(record) ? (
+        <Form.Item name="year" style={{ margin: 0 }}>
+          <Select options={yearOptions} size="small" style={{ width: 80 }} />
+        </Form.Item>
+      ) : text
+    },
+    { 
+      title: 'Brand', 
+      dataIndex: 'brand', 
+      key: 'brand',
+      render: (text, record) => isEditing(record) ? (
+        <Form.Item name="brand" style={{ margin: 0 }}><Input size="small" /></Form.Item>
+      ) : text
+    },
+    { 
+      title: 'Model', 
+      dataIndex: 'model', 
+      key: 'model',
+      render: (text, record) => isEditing(record) ? (
+        <Form.Item name="model" style={{ margin: 0 }}><Input size="small" /></Form.Item>
+      ) : text
+    },
+    { 
+      title: 'Color', 
+      dataIndex: 'color', 
+      key: 'color',
+      render: (text, record) => isEditing(record) ? (
+        <Form.Item name="color" style={{ margin: 0 }}><Input size="small" /></Form.Item>
+      ) : text
+    },
+    { 
+      title: 'Purchase Date', 
+      dataIndex: 'date_of_buy', 
+      key: 'date_of_buy',
+      render: (text, record) => isEditing(record) ? (
+        <Form.Item name="date_of_buy" style={{ margin: 0 }}>
+          <DatePicker size="small" />
+        </Form.Item>
+      ) : text
+    },
+    { 
+      title: 'Delivery Date', 
+      dataIndex: 'date_delivery', 
+      key: 'date_delivery',
+      render: (text, record) => isEditing(record) ? (
+        <Form.Item name="date_delivery" style={{ margin: 0 }}>
+          <DatePicker size="small" />
+        </Form.Item>
+      ) : text
+    },
+    { 
+      title: 'Delivery Time', 
+      dataIndex: 'delivery_time', 
+      key: 'delivery_time',
+      render: (text, record) => isEditing(record) ? (
+        <Form.Item name="delivery_time" style={{ margin: 0 }}>
+          <TimePicker format="HH:mm" size="small" />
+        </Form.Item>
+      ) : text
+    },
+    { 
+      title: 'Status', 
+      dataIndex: 'result', 
+      key: 'result',
+      render: (text, record) => isEditing(record) ? (
+        <Form.Item name="result" style={{ margin: 0 }}>
+          <Select options={[
+            { value: 'N/A', label: 'N/A' },
+            { value: 'Gas Full', label: 'Gas Full' },
+            { value: 'Cleaned', label: 'Cleaned' },
+            { value: 'Delivered', label: 'Delivered' },
+          ]} size="small" style={{ width: 100 }} />
+        </Form.Item>
+      ) : text
+    },
+    { 
+      title: 'Benefit', 
+      dataIndex: 'benefit', 
+      key: 'benefit',
+      render: (text, record) => isEditing(record) ? (
+        <Form.Item name="benefit" style={{ margin: 0 }}>
+          <Select options={[
+            { value: 'N/A', label: 'N/A' },
+            { value: 'All season mat', label: 'All season mat' },
+            { value: 'Trunk tray', label: 'Trunk tray' },
+            { value: 'Oil change service', label: 'Oil change service' },
+          ]} size="small" style={{ width: 120 }} />
+        </Form.Item>
+      ) : text
+    },
+    { 
+      title: 'Qty', 
+      dataIndex: 'benefit_qty', 
+      key: 'benefit_qty',
+      render: (text, record) => isEditing(record) ? (
+        <Form.Item name="benefit_qty" style={{ margin: 0 }}>
+          <Select options={Array.from({ length: 10 }, (_, i) => ({ value: i + 1, label: (i + 1).toString() }))} size="small" />
+        </Form.Item>
+      ) : text
+    },
+    { 
+      title: 'Remarks', 
+      dataIndex: 'part_incentive', 
+      key: 'part_incentive', 
+      width: 200,
+      render: (text, record) => isEditing(record) ? (
+        <Form.Item name="part_incentive" style={{ margin: 0 }}><Input size="small" /></Form.Item>
+      ) : text
+    },
+    {
+      title: 'Action',
+      key: 'action',
+      fixed: 'right',
+      className: 'no-print',
+      render: (_, record) => {
+        const editable = isEditing(record);
+        return editable ? (
+          <Space>
+            <Button type="primary" size="small" onClick={() => save(record.id)}>Save</Button>
+            <Button size="small" onClick={cancel}>Cancel</Button>
+          </Space>
+        ) : (
+          <Button disabled={editingKey !== ''} size="small" onClick={() => edit(record)}>
+            Edit
+          </Button>
+        );
+      },
+    },
   ];
 
   return (
@@ -240,7 +402,7 @@ const SalesEntryForm = () => {
             </Col>
             <Col xs={24} sm={12} md={6}>
               <Form.Item name="contact_number" label="Contact">
-                <Input placeholder="(604) 783-6903" onChange={handleContactChange} />
+                <Input placeholder="(604) 783-6903" onChange={(e) => handleContactChange(e, form)} />
               </Form.Item>
             </Col>
           </Row>
@@ -341,25 +503,27 @@ const SalesEntryForm = () => {
         style={{ width: '100%' }}
       >
         <div style={{ width: '100%', overflowX: 'auto' }}>
-          <Table 
-            dataSource={dataList} 
-            columns={columns.map(col => ({
-              ...col,
-              onCell: () => ({
-                style: { whiteSpace: 'nowrap' },
-              }),
-              onHeaderCell: () => ({
-                style: { whiteSpace: 'nowrap' },
-              }),
-            }))} 
-            rowKey={(record, index) => record.id || index} 
-            loading={tableLoading}
-            pagination={{ pageSize: 20 }}
-            size="small"
-            bordered
-            sticky
-            scroll={{ x: 'max-content' }}
-          />
+          <Form form={editForm} component={false}>
+            <Table 
+              dataSource={dataList} 
+              columns={columns.map(col => ({
+                ...col,
+                onCell: () => ({
+                  style: { whiteSpace: 'nowrap' },
+                }),
+                onHeaderCell: () => ({
+                  style: { whiteSpace: 'nowrap' },
+                }),
+              }))} 
+              rowKey={(record, index) => record.id || index} 
+              loading={tableLoading}
+              pagination={{ pageSize: 20 }}
+              size="small"
+              bordered
+              sticky
+              scroll={{ x: 'max-content' }}
+            />
+          </Form>
         </div>
       </Card>
     </div>
