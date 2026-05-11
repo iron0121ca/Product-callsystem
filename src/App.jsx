@@ -1,3 +1,4 @@
+// Sync Verification: v2.0 - Excel Export Integrated
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { 
