@@ -153,12 +153,11 @@ const SalesEntryForm = () => {
       dataIndex: 'type', 
       key: 'type',
       render: (text) => {
-        const type = text || 'N/A';
+        const typeValue = text || 'N/A';
         let color = 'default';
-        if (type === 'Delivered') color = 'green';
-        if (type === 'Buy') color = 'orange';
-        if (type === 'Delivery') color = 'blue';
-        return <Tag color={color}>{type}</Tag>;
+        if (typeValue === 'Sell') color = 'green';
+        if (typeValue === 'Buy') color = 'orange';
+        return <Tag color={color}>{typeValue}</Tag>;
       }
     },
     { title: 'Condition', dataIndex: 'car_type', key: 'car_type' },
@@ -387,9 +386,6 @@ const SalesEntryForm = () => {
       </Card>
     </div>
   );
-};
-
-export default SalesEntryForm;;
 };
 
 export default SalesEntryForm;
