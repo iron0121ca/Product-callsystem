@@ -105,11 +105,25 @@ const SalesEntryForm = () => {
   const onFinish = async (values) => {
     setLoading(true);
     try {
+      // 1. Prepare data and EXCLUDE fields that shouldn't be updated
       const dataToSubmit = {
-        ...values,
+        annual_year: values.annual_year,
+        type: values.type,
+        car_type: values.car_type,
+        stock_number: values.stock_number,
+        name: values.name,
+        contact_number: values.contact_number,
+        year: values.year,
+        brand: values.brand,
+        model: values.model,
+        color: values.color,
         date_of_buy: values.date_of_buy?.format('YYYY-MM-DD'),
         date_delivery: values.date_delivery?.format('YYYY-MM-DD'),
         delivery_time: values.delivery_time?.format('HH:mm:ss'),
+        result: values.result,
+        benefit: values.benefit,
+        benefit_qty: values.benefit_qty,
+        part_incentive: values.part_incentive,
       };
 
       if (isEditing) {
@@ -131,8 +145,9 @@ const SalesEntryForm = () => {
         message.success('New record added successfully!');
       }
 
-      handleCancelEdit(); // Reset form and state
-      fetchData(); 
+      // 2. Reset state AND Wait for data refresh
+      handleCancelEdit(); 
+      await fetchData(); 
       
     } catch (error) {
       message.error('Operation failed: ' + error.message);
