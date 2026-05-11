@@ -109,7 +109,7 @@ const SalesEntryForm = () => {
       form.resetFields();
       // Reset specific defaults
       form.setFieldsValue({
-        annual_year: '2025',
+        annual_year: dayjs().year().toString(),
         year: dayjs().year().toString(),
         result: 'N/A',
         benefit: 'N/A',
@@ -198,7 +198,7 @@ const SalesEntryForm = () => {
           layout="vertical" 
           onFinish={onFinish}
           initialValues={{ 
-            annual_year: '2025', 
+            annual_year: dayjs().year().toString(), 
             car_type: 'New',
             year: dayjs().year().toString(),
             result: 'N/A',
