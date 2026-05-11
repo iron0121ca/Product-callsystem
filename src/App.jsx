@@ -106,14 +106,15 @@ const SalesEntryForm = () => {
     setLoading(true);
     console.log('Submitting data:', values);
     try {
+      // 1. Prepare data with correct types (Integer parsing for years)
       const dataToSubmit = {
-        annual_year: values.annual_year,
+        annual_year: parseInt(values.annual_year),
         type: values.type,
         car_type: values.car_type,
         stock_number: values.stock_number,
         name: values.name,
         contact_number: values.contact_number,
-        year: values.year,
+        year: parseInt(values.year),
         brand: values.brand,
         model: values.model,
         color: values.color,
@@ -136,14 +137,14 @@ const SalesEntryForm = () => {
         
         if (error) throw error;
         
-        if (data && data.length > 0) {
-          message.success('Record updated successfully!');
-          // Optimistic Local State Update
-          setDataList(prev => prev.map(item => item.id === editingId ? data[0] : item));
-        } else {
-          console.warn('No rows updated. Check if the ID exists.');
-          message.warning('Update successful but no changes detected or row not found.');
-        }
+        // Optimistic Local State Update with robust String comparison and merging
+        setDataList(prev => prev.map(item => 
+          String(item.id) === String(editingId) 
+            ? { ...item, ...dataToSubmit, ...(data?.[0] || {}) } 
+            : item
+        ));
+        
+        message.success('Record updated successfully!');
       } else {
         const { data, error } = await supabase
           .from('sales_records')
@@ -156,7 +157,7 @@ const SalesEntryForm = () => {
       }
 
       handleCancelEdit(); 
-      // Re-fetch as a fallback to ensure total consistency
+      // 2. Force refresh from database
       await fetchData(); 
       
     } catch (error) {
