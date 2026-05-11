@@ -229,8 +229,7 @@ const SalesEntryForm = () => {
               <Form.Item name="type" label="Type" rules={[{ required: true }]}>
                 <Select options={[
                   { value: 'Buy', label: 'Buy' },
-                  { value: 'Delivery', label: 'Delivery' },
-                  { value: 'Delivered', label: 'Delivered' },
+                  { value: 'Sell', label: 'Sell' },
                 ]} />
               </Form.Item>
             </Col>
@@ -388,6 +387,9 @@ const SalesEntryForm = () => {
       </Card>
     </div>
   );
+};
+
+export default SalesEntryForm;;
 };
 
 export default SalesEntryForm;
