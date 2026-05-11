@@ -1,3 +1,42 @@
+/* ... existing styles ... */
+
+@media print {
+  .ant-card-head,
+  .ant-btn,
+  .ant-pagination,
+  form,
+  .no-print {
+    display: none !important;
+  }
+
+  .ant-card {
+    border: none !important;
+    background: transparent !important;
+  }
+
+  .ant-card-body {
+    padding: 0 !important;
+  }
+
+  .ant-table-wrapper {
+    width: 100% !important;
+  }
+
+  body {
+    background: white !important;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Ensure table is fully visible */
+  .ant-table-container {
+    overflow: visible !important;
+  }
+  .ant-table-content {
+    overflow: visible !important;
+  }
+}
+
 .counter {
   font-size: 16px;
   padding: 5px 10px;

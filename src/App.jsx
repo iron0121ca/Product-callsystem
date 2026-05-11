@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { 
   Form, Input, Button, DatePicker, TimePicker, 
-  Select, message, Card, Table, Tag, Row, Col
+  Select, message, Card, Table, Tag, Row, Col, Space
 } from 'antd';
+import { PrinterOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 
 // 1. Configure Supabase
@@ -14,6 +15,46 @@ const SalesEntryForm = () => {
   const [loading, setLoading] = useState(false);
   const [dataList, setDataList] = useState([]); // Store data list from DB
   const [tableLoading, setTableLoading] = useState(false);
+  const [editingKey, setEditingKey] = useState('');
+
+  // --- Phone Formatting ---
+  const formatPhoneNumber = (value) => {
+    if (!value) return value;
+    const phoneNumber = value.replace(/[^\d]/g, '');
+    const phoneNumberLength = phoneNumber.length;
+    if (phoneNumberLength < 4) return phoneNumber;
+    if (phoneNumberLength < 7) {
+      return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3)}`;
+    }
+    return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
+  };
+
+  const handleContactChange = (e) => {
+    const formatted = formatPhoneNumber(e.target.value);
+    form.setFieldsValue({ contact_number: formatted });
+  };
+
+  // --- Inline Edit Logic ---
+  const updateStockNumber = async (record, newStock) => {
+    if (record.stock_number === newStock) {
+      setEditingKey('');
+      return;
+    }
+    try {
+      const { error } = await supabase
+        .from('sales_records')
+        .update({ stock_number: newStock })
+        .eq('id', record.id);
+      
+      if (error) throw error;
+      message.success('Stock# updated');
+      fetchData();
+    } catch (err) {
+      message.error('Update failed: ' + err.message);
+    } finally {
+      setEditingKey('');
+    }
+  };
 
   // --- Generate Year Options ---
   const annualYearOptions = Array.from({ length: 2050 - 2024 + 1 }, (_, i) => {
@@ -66,6 +107,15 @@ const SalesEntryForm = () => {
 
       message.success('Data successfully synced to system!');
       form.resetFields();
+      // Reset specific defaults
+      form.setFieldsValue({
+        annual_year: '2025',
+        year: dayjs().year().toString(),
+        result: 'N/A',
+        benefit: 'N/A',
+        benefit_qty: 1,
+        type: 'Buy'
+      });
       fetchData(); 
       
     } catch (error) {
@@ -82,8 +132,43 @@ const SalesEntryForm = () => {
       key: 'annual_year',
       render: (text) => <Tag color="blue">{text}</Tag>
     },
+    { 
+      title: 'Type', 
+      dataIndex: 'type', 
+      key: 'type',
+      render: (type) => {
+        let color = 'default';
+        if (type === 'Delivered') color = 'green';
+        if (type === 'Buy') color = 'orange';
+        if (type === 'Delivery') color = 'blue';
+        return <Tag color={color}>{type || 'N/A'}</Tag>;
+      }
+    },
     { title: 'Condition', dataIndex: 'car_type', key: 'car_type' },
-    { title: 'Stock#', dataIndex: 'stock_number', key: 'stock_number' },
+    { 
+      title: 'Stock#', 
+      dataIndex: 'stock_number', 
+      key: 'stock_number',
+      render: (text, record) => {
+        const isEditing = editingKey === record.id;
+        return isEditing ? (
+          <Input 
+            defaultValue={text} 
+            autoFocus 
+            onBlur={(e) => updateStockNumber(record, e.target.value)}
+            onPressEnter={(e) => updateStockNumber(record, e.target.value)}
+            size="small"
+          />
+        ) : (
+          <div 
+            onClick={() => setEditingKey(record.id)} 
+            style={{ cursor: 'pointer', minWidth: '80px', textDecoration: 'underline dotted' }}
+          >
+            {text}
+          </div>
+        );
+      }
+    },
     { title: 'Customer Name', dataIndex: 'name', key: 'name' },
     { title: 'Contact', dataIndex: 'contact_number', key: 'contact_number' },
     { title: 'Year', dataIndex: 'year', key: 'year' },
@@ -95,6 +180,7 @@ const SalesEntryForm = () => {
     { title: 'Delivery Time', dataIndex: 'delivery_time', key: 'delivery_time' },
     { title: 'Status', dataIndex: 'result', key: 'result' },
     { title: 'Benefit', dataIndex: 'benefit', key: 'benefit' },
+    { title: 'Qty', dataIndex: 'benefit_qty', key: 'benefit_qty' },
     { title: 'Remarks', dataIndex: 'part_incentive', key: 'part_incentive', width: 200 },
   ];
 
@@ -111,13 +197,30 @@ const SalesEntryForm = () => {
           form={form} 
           layout="vertical" 
           onFinish={onFinish}
-          initialValues={{ annual_year: '2025', car_type: 'New' }}
+          initialValues={{ 
+            annual_year: '2025', 
+            car_type: 'New',
+            year: dayjs().year().toString(),
+            result: 'N/A',
+            benefit: 'N/A',
+            benefit_qty: 1,
+            type: 'Buy'
+          }}
           size="middle"
         >
           <Row gutter={16}>
             <Col xs={24} sm={6} md={3}>
               <Form.Item name="annual_year" label="Annual" rules={[{ required: true }]}>
                 <Select options={annualYearOptions} />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={6} md={3}>
+              <Form.Item name="type" label="Type" rules={[{ required: true }]}>
+                <Select options={[
+                  { value: 'Buy', label: 'Buy' },
+                  { value: 'Delivery', label: 'Delivery' },
+                  { value: 'Delivered', label: 'Delivered' },
+                ]} />
               </Form.Item>
             </Col>
             <Col xs={24} sm={6} md={3}>
@@ -130,14 +233,14 @@ const SalesEntryForm = () => {
                 <Input placeholder="H25XXX" />
               </Form.Item>
             </Col>
-            <Col xs={24} sm={24} md={8}>
+            <Col xs={24} sm={24} md={5}>
               <Form.Item name="name" label="Customer Name" rules={[{ required: true }]}>
                 <Input placeholder="e.g. Ming Lo Kim" />
               </Form.Item>
             </Col>
             <Col xs={24} sm={12} md={6}>
               <Form.Item name="contact_number" label="Contact">
-                <Input placeholder="(604) 783-6903" />
+                <Input placeholder="(604) 783-6903" onChange={handleContactChange} />
               </Form.Item>
             </Col>
           </Row>
@@ -181,22 +284,29 @@ const SalesEntryForm = () => {
           </Row>
 
           <Row gutter={16}>
-            <Col xs={24} sm={12} md={6}>
+            <Col xs={24} sm={12} md={4}>
               <Form.Item name="result" label="Status">
                 <Select placeholder="Select Status" options={[
+                  { value: 'N/A', label: 'N/A' },
                   { value: 'Gas Full', label: 'Gas Full' },
                   { value: 'Cleaned', label: 'Cleaned' },
                   { value: 'Delivered', label: 'Delivered' },
                 ]} />
               </Form.Item>
             </Col>
-            <Col xs={24} sm={12} md={6}>
+            <Col xs={24} sm={12} md={5}>
               <Form.Item name="benefit" label="Benefit">
                 <Select placeholder="Select Benefit" options={[
+                  { value: 'N/A', label: 'N/A' },
                   { value: 'All season mat', label: 'All season mat' },
                   { value: 'Trunk tray', label: 'Trunk tray' },
                   { value: 'Oil change service', label: 'Oil change service' },
                 ]} />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={12} md={3}>
+              <Form.Item name="benefit_qty" label="Benefit Qty">
+                <Select options={Array.from({ length: 10 }, (_, i) => ({ value: i + 1, label: (i + 1).toString() }))} />
               </Form.Item>
             </Col>
             <Col xs={24} sm={24} md={12}>
@@ -217,6 +327,15 @@ const SalesEntryForm = () => {
       {/* Bottom Section: Data Table with horizontal scroll and sticky header */}
       <Card 
         title="Recent Records" 
+        extra={
+          <Button 
+            icon={<PrinterOutlined />} 
+            onClick={() => window.print()}
+            className="no-print"
+          >
+            Print List
+          </Button>
+        }
         variant="outlined" 
         styles={{ body: { padding: 0 } }}
         style={{ width: '100%' }}
