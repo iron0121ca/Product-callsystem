@@ -64,6 +64,7 @@ const SalesEntryForm = () => {
     // Restore defaults
     form.setFieldsValue({
       annual_year: dayjs().year().toString(),
+      month: dayjs().format('MMM'),
       year: dayjs().year().toString(),
       result: 'N/A',
       benefit: 'N/A',
@@ -72,7 +73,7 @@ const SalesEntryForm = () => {
     });
   };
 
-  // --- Generate Year Options ---
+  // --- Generate Options ---
   const annualYearOptions = Array.from({ length: 2050 - 2024 + 1 }, (_, i) => {
     const year = 2024 + i;
     return { value: year.toString(), label: year.toString() };
@@ -82,6 +83,11 @@ const SalesEntryForm = () => {
     const year = 1900 + i;
     return { value: year.toString(), label: year.toString() };
   });
+
+  const monthOptions = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+  ].map(m => ({ value: m, label: m }));
 
   // --- Fetch Data Function ---
   const fetchData = async () => {
@@ -125,9 +131,10 @@ const SalesEntryForm = () => {
     setLoading(true);
     console.log('Submitting data:', values);
     try {
-      // 1. Prepare data with correct types (Integer parsing for years)
+      // 1. Prepare data with correct types
       const dataToSubmit = {
         annual_year: parseInt(values.annual_year),
+        month: values.month,
         type: values.type,
         car_type: values.car_type,
         stock_number: values.stock_number,
@@ -156,7 +163,7 @@ const SalesEntryForm = () => {
         
         if (error) throw error;
         
-        // Optimistic Local State Update with robust String comparison and merging
+        // Optimistic Local State Update
         setDataList(prev => prev.map(item => 
           String(item.id) === String(editingId) 
             ? { ...item, ...dataToSubmit, ...(data?.[0] || {}) } 
@@ -176,7 +183,6 @@ const SalesEntryForm = () => {
       }
 
       handleCancelEdit(); 
-      // 2. Force refresh from database
       await fetchData(); 
       
     } catch (error) {
@@ -193,6 +199,12 @@ const SalesEntryForm = () => {
       dataIndex: 'annual_year', 
       key: 'annual_year',
       render: (text) => <Tag color="blue">{text}</Tag>
+    },
+    { 
+      title: 'Month', 
+      dataIndex: 'month', 
+      key: 'month',
+      render: (text) => <Tag color="cyan">{text}</Tag>
     },
     { 
       title: 'Type', 
@@ -274,6 +286,7 @@ const SalesEntryForm = () => {
           onFinish={onFinish}
           initialValues={{ 
             annual_year: dayjs().year().toString(), 
+            month: dayjs().format('MMM'),
             car_type: 'New',
             year: dayjs().year().toString(),
             result: 'N/A',
@@ -287,6 +300,11 @@ const SalesEntryForm = () => {
             <Col xs={24} sm={6} md={3}>
               <Form.Item name="annual_year" label="Annual" rules={[{ required: true }]}>
                 <Select options={annualYearOptions} />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={6} md={3}>
+              <Form.Item name="month" label="Month" rules={[{ required: true }]}>
+                <Select options={monthOptions} />
               </Form.Item>
             </Col>
             <Col xs={24} sm={6} md={3}>
@@ -312,20 +330,20 @@ const SalesEntryForm = () => {
                 <Input placeholder="e.g. Ming Lo Kim" />
               </Form.Item>
             </Col>
+          </Row>
+
+          <Row gutter={16}>
             <Col xs={24} sm={12} md={6}>
               <Form.Item name="contact_number" label="Contact">
                 <Input placeholder="(604) 783-6903" onChange={handleContactChange} />
               </Form.Item>
             </Col>
-          </Row>
-
-          <Row gutter={16}>
             <Col xs={12} sm={6} md={3}>
               <Form.Item name="year" label="Year">
                 <Select options={yearOptions} />
               </Form.Item>
             </Col>
-            <Col xs={12} sm={6} md={4}>
+            <Col xs={12} sm={6} md={3}>
               <Form.Item name="brand" label="Brand">
                 <Input placeholder="Honda" />
               </Form.Item>
@@ -340,7 +358,7 @@ const SalesEntryForm = () => {
                 <Input placeholder="Red" />
               </Form.Item>
             </Col>
-            <Col xs={24} sm={8} md={3}>
+            <Col xs={24} sm={8} md={2}>
               <Form.Item name="date_of_buy" label="Buy Date">
                 <DatePicker style={{ width: '100%' }} />
               </Form.Item>
@@ -350,14 +368,14 @@ const SalesEntryForm = () => {
                 <DatePicker style={{ width: '100%' }} />
               </Form.Item>
             </Col>
-            <Col xs={24} sm={8} md={4}>
+          </Row>
+
+          <Row gutter={16}>
+            <Col xs={24} sm={8} md={3}>
               <Form.Item name="delivery_time" label="Deliv. Time">
                 <TimePicker format="HH:mm" style={{ width: '100%' }} />
               </Form.Item>
             </Col>
-          </Row>
-
-          <Row gutter={16}>
             <Col xs={24} sm={12} md={4}>
               <Form.Item name="result" label="Status">
                 <Select placeholder="Select Status" options={[
@@ -380,10 +398,10 @@ const SalesEntryForm = () => {
             </Col>
             <Col xs={24} sm={12} md={3}>
               <Form.Item name="benefit_qty" label="Benefit Qty">
-                <Select options={Array.from({ length: 10 }, (_, i) => ({ value: i + 1, label: (i + 1).toString() }))} />
+                <Select options={Array.from({ length: 11 }, (_, i) => ({ value: i, label: i.toString() }))} />
               </Form.Item>
             </Col>
-            <Col xs={24} sm={24} md={12}>
+            <Col xs={24} sm={24} md={9}>
               <Form.Item name="part_incentive" label="Remarks">
                 <Input placeholder="e.g. Mention 2 oil changes to manager..." />
               </Form.Item>
