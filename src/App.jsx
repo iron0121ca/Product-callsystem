@@ -6,9 +6,11 @@ import {
 } from 'antd';
 import { 
   PrinterOutlined, EditOutlined, PlusOutlined, 
-  SaveOutlined, CloseOutlined, DeleteOutlined 
+  SaveOutlined, CloseOutlined, DeleteOutlined,
+  DownloadOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import * as XLSX from 'xlsx';
 
 // 1. Configure Supabase
 const supabase = createClient('https://ishyhtympjphqkaieeud.supabase.co', 'sb_publishable_vtxImjk27hsDa-o10lF-oA_uwe4K7o5');
@@ -110,6 +112,35 @@ const SalesEntryForm = () => {
   useEffect(() => {
     fetchData();
   }, []);
+
+  // --- Export Excel Logic ---
+  const handleExportExcel = () => {
+    const exportData = dataList.map(item => ({
+      'Annual': item.annual_year,
+      'Month': item.month,
+      'Type': item.type,
+      'Condition': item.car_type,
+      'StockNo': item.stock_number,
+      'CustomerName': item.name,
+      'Contact': item.contact_number,
+      'Year': item.year,
+      'Brand': item.brand,
+      'Model': item.model,
+      'Color': item.color,
+      'PurchaseDate': item.date_of_buy,
+      'DeliveryDate': item.date_delivery,
+      'DeliveryTime': item.delivery_time,
+      'Status': item.result,
+      'Benefit': item.benefit,
+      'Qty': item.benefit_qty,
+      'Remarks': item.part_incentive
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'SalesRecords');
+    XLSX.writeFile(workbook, `sales_records_${dayjs().format('YYYY-MM-DD_HH-mm')}.xlsx`);
+  };
 
   // --- Delete Logic ---
   const handleDelete = async (id) => {
@@ -433,13 +464,20 @@ const SalesEntryForm = () => {
       <Card 
         title="Recent Records" 
         extra={
-          <Button 
-            icon={<PrinterOutlined />} 
-            onClick={() => window.print()}
-            className="no-print"
-          >
-            Print List
-          </Button>
+          <Space className="no-print">
+            <Button 
+              icon={<DownloadOutlined />} 
+              onClick={handleExportExcel}
+            >
+              Export Excel
+            </Button>
+            <Button 
+              icon={<PrinterOutlined />} 
+              onClick={() => window.print()}
+            >
+              Print List
+            </Button>
+          </Space>
         }
         variant="outlined" 
         styles={{ body: { padding: 0 } }}
