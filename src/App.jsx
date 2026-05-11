@@ -2,9 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { 
   Form, Input, Button, DatePicker, TimePicker, 
-  Select, message, Card, Table, Tag, Row, Col, Space
+  Select, message, Card, Table, Tag, Row, Col, Space, Popconfirm
 } from 'antd';
-import { PrinterOutlined, EditOutlined, PlusOutlined, SaveOutlined, CloseOutlined } from '@ant-design/icons';
+import { 
+  PrinterOutlined, EditOutlined, PlusOutlined, 
+  SaveOutlined, CloseOutlined, DeleteOutlined 
+} from '@ant-design/icons';
 import dayjs from 'dayjs';
 
 // 1. Configure Supabase
@@ -101,6 +104,22 @@ const SalesEntryForm = () => {
   useEffect(() => {
     fetchData();
   }, []);
+
+  // --- Delete Logic ---
+  const handleDelete = async (id) => {
+    try {
+      const { error } = await supabase
+        .from('sales_records')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      message.success('Record deleted successfully');
+      await fetchData();
+    } catch (err) {
+      message.error('Delete failed: ' + err.message);
+    }
+  };
 
   const onFinish = async (values) => {
     setLoading(true);
@@ -208,14 +227,33 @@ const SalesEntryForm = () => {
       fixed: 'right',
       className: 'no-print',
       render: (_, record) => (
-        <Button 
-          icon={<EditOutlined />} 
-          size="small" 
-          onClick={() => handleEdit(record)}
-          disabled={isEditing && editingId === record.id}
-        >
-          Edit
-        </Button>
+        <Space size="middle">
+          <Button 
+            icon={<EditOutlined />} 
+            size="small" 
+            onClick={() => handleEdit(record)}
+            disabled={isEditing && editingId === record.id}
+          >
+            Edit
+          </Button>
+          <Popconfirm
+            title="Delete this record?"
+            description="Are you sure you want to delete this record?"
+            onConfirm={() => handleDelete(record.id)}
+            okText="Yes"
+            cancelText="No"
+            okButtonProps={{ danger: true }}
+          >
+            <Button 
+              danger 
+              icon={<DeleteOutlined />} 
+              size="small"
+              disabled={isEditing && editingId === record.id}
+            >
+              Delete
+            </Button>
+          </Popconfirm>
+        </Space>
       ),
     },
   ];
