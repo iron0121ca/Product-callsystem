@@ -104,8 +104,8 @@ const SalesEntryForm = () => {
 
   const onFinish = async (values) => {
     setLoading(true);
+    console.log('Submitting data:', values);
     try {
-      // 1. Prepare data and EXCLUDE fields that shouldn't be updated
       const dataToSubmit = {
         annual_year: values.annual_year,
         type: values.type,
@@ -117,9 +117,9 @@ const SalesEntryForm = () => {
         brand: values.brand,
         model: values.model,
         color: values.color,
-        date_of_buy: values.date_of_buy?.format('YYYY-MM-DD'),
-        date_delivery: values.date_delivery?.format('YYYY-MM-DD'),
-        delivery_time: values.delivery_time?.format('HH:mm:ss'),
+        date_of_buy: values.date_of_buy ? values.date_of_buy.format('YYYY-MM-DD') : null,
+        date_delivery: values.date_delivery ? values.date_delivery.format('YYYY-MM-DD') : null,
+        delivery_time: values.delivery_time ? values.delivery_time.format('HH:mm:ss') : null,
         result: values.result,
         benefit: values.benefit,
         benefit_qty: values.benefit_qty,
@@ -127,30 +127,41 @@ const SalesEntryForm = () => {
       };
 
       if (isEditing) {
-        // Update Logic
-        const { error } = await supabase
+        console.log('Updating record ID:', editingId);
+        const { data, error } = await supabase
           .from('sales_records')
           .update(dataToSubmit)
-          .eq('id', editingId);
+          .eq('id', editingId)
+          .select();
         
         if (error) throw error;
-        message.success('Record updated successfully!');
+        
+        if (data && data.length > 0) {
+          message.success('Record updated successfully!');
+          // Optimistic Local State Update
+          setDataList(prev => prev.map(item => item.id === editingId ? data[0] : item));
+        } else {
+          console.warn('No rows updated. Check if the ID exists.');
+          message.warning('Update successful but no changes detected or row not found.');
+        }
       } else {
-        // Insert Logic
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('sales_records')
-          .insert([dataToSubmit]);
+          .insert([dataToSubmit])
+          .select();
         
         if (error) throw error;
         message.success('New record added successfully!');
+        if (data) setDataList(prev => [data[0], ...prev]);
       }
 
-      // 2. Reset state AND Wait for data refresh
       handleCancelEdit(); 
+      // Re-fetch as a fallback to ensure total consistency
       await fetchData(); 
       
     } catch (error) {
-      message.error('Operation failed: ' + error.message);
+      console.error('Operation Error:', error);
+      message.error('Operation failed: ' + (error.message || 'Unknown error'));
     } finally {
       setLoading(false);
     }
