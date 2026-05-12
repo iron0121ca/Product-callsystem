@@ -339,22 +339,68 @@ const SalesEntryForm = () => {
         width: '100%',
         transition: 'background 0.3s'
       }}>
+        {/* Top Header: Title and Dark Mode Toggle */}
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          padding: '0 8px 8px 8px' 
+        }} className="no-print">
+          <h2 style={{ margin: 0, color: isDarkMode ? '#fff' : '#000', fontSize: '24px', fontWeight: 'bold' }}>
+            {isEditing ? "Edit Sale Record" : "Sales Entry"}
+          </h2>
+          <Space>
+            <Switch
+              checked={isDarkMode}
+              onChange={(checked) => setIsDarkMode(checked)}
+              checkedChildren={<MoonOutlined />}
+              unCheckedChildren={<SunOutlined />}
+            />
+            <span style={{ color: isDarkMode ? '#fff' : '#000', fontSize: '12px' }}>
+              {isDarkMode ? 'Dark' : 'Light'}
+            </span>
+          </Space>
+        </div>
+
+        {/* Navigation Bar: Placed at the top, below title */}
+        <div style={{ 
+          background: '#87CEEB', 
+          padding: '8px 16px', 
+          marginBottom: '8px', 
+          borderRadius: '8px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+        }} className="no-print">
+          <Button 
+            type="text"
+            icon={<HomeOutlined />} 
+            style={{ 
+              color: '#fff', 
+              fontWeight: 'bold',
+              backgroundColor: currentView === 'home' ? 'rgba(255,255,255,0.3)' : 'transparent'
+            }}
+            onClick={() => setCurrentView('home')}
+          >
+            Home
+          </Button>
+          <Button 
+            type="text"
+            icon={<UsergroupAddOutlined />} 
+            style={{ 
+              color: '#fff', 
+              fontWeight: 'bold',
+              backgroundColor: currentView === 'following' ? 'rgba(255,255,255,0.3)' : 'transparent'
+            }}
+            onClick={() => setCurrentView('following')}
+          >
+            Following
+          </Button>
+        </div>
+
         {/* Top Section: Entry Form */}
         <Card 
-          title={isEditing ? "Edit Sale Record" : "Sales Entry"} 
-          extra={
-            <Space className="no-print">
-              <Switch
-                checked={isDarkMode}
-                onChange={(checked) => setIsDarkMode(checked)}
-                checkedChildren={<MoonOutlined />}
-                unCheckedChildren={<SunOutlined />}
-              />
-              <span style={{ color: isDarkMode ? '#fff' : '#000', fontSize: '12px' }}>
-                {isDarkMode ? 'Dark' : 'Light'}
-              </span>
-            </Space>
-          }
           variant="outlined"
           style={{ marginBottom: '8px', width: '100%' }}
           styles={{ body: { background: isDarkMode ? '#141414' : '#f0f2f5' } }}
@@ -508,43 +554,6 @@ const SalesEntryForm = () => {
           </Form.Item>
         </Form>
       </Card>
-
-      {/* Navigation Bar */}
-      <div style={{ 
-        background: '#87CEEB', 
-        padding: '8px 16px', 
-        marginBottom: '8px', 
-        borderRadius: '8px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-      }} className="no-print">
-        <Button 
-          type="text"
-          icon={<HomeOutlined />} 
-          style={{ 
-            color: '#fff', 
-            fontWeight: 'bold',
-            backgroundColor: currentView === 'home' ? 'rgba(255,255,255,0.3)' : 'transparent'
-          }}
-          onClick={() => setCurrentView('home')}
-        >
-          Home
-        </Button>
-        <Button 
-          type="text"
-          icon={<UsergroupAddOutlined />} 
-          style={{ 
-            color: '#fff', 
-            fontWeight: 'bold',
-            backgroundColor: currentView === 'following' ? 'rgba(255,255,255,0.3)' : 'transparent'
-          }}
-          onClick={() => setCurrentView('following')}
-        >
-          Following
-        </Button>
-      </div>
 
       {/* Bottom Section: Data Table or Following View */}
       {currentView === 'home' ? (
