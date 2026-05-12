@@ -365,21 +365,23 @@ const SalesEntryForm = () => {
         {/* Navigation Bar: Placed at the top, below title */}
         <div style={{ 
           background: '#87CEEB', 
-          padding: '8px 16px', 
+          padding: '4px 12px', 
           marginBottom: '8px', 
           borderRadius: '8px',
           display: 'flex',
           alignItems: 'center',
-          gap: '12px',
+          gap: '8px',
           boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
         }} className="no-print">
           <Button 
             type="text"
+            size="small"
             icon={<HomeOutlined />} 
             style={{ 
               color: '#fff', 
               fontWeight: 'bold',
-              backgroundColor: currentView === 'home' ? 'rgba(255,255,255,0.3)' : 'transparent'
+              backgroundColor: currentView === 'home' ? 'rgba(255,255,255,0.3)' : 'transparent',
+              fontSize: '13px'
             }}
             onClick={() => setCurrentView('home')}
           >
@@ -387,11 +389,13 @@ const SalesEntryForm = () => {
           </Button>
           <Button 
             type="text"
+            size="small"
             icon={<UsergroupAddOutlined />} 
             style={{ 
               color: '#fff', 
               fontWeight: 'bold',
-              backgroundColor: currentView === 'following' ? 'rgba(255,255,255,0.3)' : 'transparent'
+              backgroundColor: currentView === 'following' ? 'rgba(255,255,255,0.3)' : 'transparent',
+              fontSize: '13px'
             }}
             onClick={() => setCurrentView('following')}
           >
