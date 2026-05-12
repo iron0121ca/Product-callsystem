@@ -9,7 +9,8 @@ import {
 import { 
   PrinterOutlined, EditOutlined, PlusOutlined, 
   SaveOutlined, CloseOutlined, DeleteOutlined,
-  DownloadOutlined, SunOutlined, MoonOutlined
+  DownloadOutlined, SunOutlined, MoonOutlined,
+  HomeOutlined, UsergroupAddOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import * as XLSX from 'xlsx';
@@ -26,6 +27,9 @@ const SalesEntryForm = () => {
   // --- New State for Form Reuse ---
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
+
+  // --- View State ---
+  const [currentView, setCurrentView] = useState('home');
 
   // --- Dark Mode State ---
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -505,51 +509,101 @@ const SalesEntryForm = () => {
         </Form>
       </Card>
 
-      {/* Bottom Section: Data Table */}
-      <Card 
-        title="Recent Records" 
-        extra={
-          <Space className="no-print">
-            <Button 
-              icon={<DownloadOutlined />} 
-              onClick={handleExportExcel}
-            >
-              Export Excel
-            </Button>
-            <Button 
-              icon={<PrinterOutlined />} 
-              onClick={() => window.print()}
-            >
-              Print List
-            </Button>
-          </Space>
-        }
-        variant="outlined" 
-        styles={{ body: { padding: 0 } }}
-        style={{ width: '100%' }}
-      >
-        <div style={{ width: '100%', overflowX: 'auto' }}>
-          <Table 
-            dataSource={dataList} 
-            columns={columns.map(col => ({
-              ...col,
-              onCell: () => ({
-                style: { whiteSpace: 'nowrap' },
-              }),
-              onHeaderCell: () => ({
-                style: { whiteSpace: 'nowrap' },
-              }),
-            }))} 
-            rowKey={(record, index) => record.id || index} 
-            loading={tableLoading}
-            pagination={{ pageSize: 20 }}
-            size="small"
-            bordered
-            sticky
-            scroll={{ x: 'max-content' }}
-          />
-        </div>
-      </Card>
+      {/* Navigation Bar */}
+      <div style={{ 
+        background: '#87CEEB', 
+        padding: '8px 16px', 
+        marginBottom: '8px', 
+        borderRadius: '8px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+      }} className="no-print">
+        <Button 
+          type="text"
+          icon={<HomeOutlined />} 
+          style={{ 
+            color: '#fff', 
+            fontWeight: 'bold',
+            backgroundColor: currentView === 'home' ? 'rgba(255,255,255,0.3)' : 'transparent'
+          }}
+          onClick={() => setCurrentView('home')}
+        >
+          Home
+        </Button>
+        <Button 
+          type="text"
+          icon={<UsergroupAddOutlined />} 
+          style={{ 
+            color: '#fff', 
+            fontWeight: 'bold',
+            backgroundColor: currentView === 'following' ? 'rgba(255,255,255,0.3)' : 'transparent'
+          }}
+          onClick={() => setCurrentView('following')}
+        >
+          Following
+        </Button>
+      </div>
+
+      {/* Bottom Section: Data Table or Following View */}
+      {currentView === 'home' ? (
+        <Card 
+          title="Recent Records" 
+          extra={
+            <Space className="no-print">
+              <Button 
+                icon={<DownloadOutlined />} 
+                onClick={handleExportExcel}
+              >
+                Export Excel
+              </Button>
+              <Button 
+                icon={<PrinterOutlined />} 
+                onClick={() => window.print()}
+              >
+                Print List
+              </Button>
+            </Space>
+          }
+          variant="outlined" 
+          styles={{ body: { padding: 0 } }}
+          style={{ width: '100%' }}
+        >
+          <div style={{ width: '100%', overflowX: 'auto' }}>
+            <Table 
+              dataSource={dataList} 
+              columns={columns.map(col => ({
+                ...col,
+                onCell: () => ({
+                  style: { whiteSpace: 'nowrap' },
+                }),
+                onHeaderCell: () => ({
+                  style: { whiteSpace: 'nowrap' },
+                }),
+              }))} 
+              rowKey={(record, index) => record.id || index} 
+              loading={tableLoading}
+              pagination={{ pageSize: 20 }}
+              size="small"
+              bordered
+              sticky
+              scroll={{ x: 'max-content' }}
+            />
+          </div>
+        </Card>
+      ) : (
+        <Card 
+          title="Following" 
+          variant="outlined" 
+          style={{ width: '100%' }}
+        >
+          <div style={{ padding: '100px 20px', textAlign: 'center', color: isDarkMode ? '#aaa' : '#888' }}>
+            <UsergroupAddOutlined style={{ fontSize: '48px', marginBottom: '16px', color: '#87CEEB' }} />
+            <div style={{ fontSize: '18px' }}>Following View Content coming soon...</div>
+          </div>
+        </Card>
+      )}
     </div>
     </ConfigProvider>
   );
