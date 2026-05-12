@@ -407,7 +407,12 @@ const SalesEntryForm = () => {
         <Card 
           variant="outlined"
           style={{ marginBottom: '8px', width: '100%' }}
-          styles={{ body: { background: isDarkMode ? '#141414' : '#f0f2f5' } }}
+          styles={{ 
+            body: { 
+              background: isDarkMode ? '#141414' : '#f0f2f5',
+              padding: '8px 12px' 
+            } 
+          }}
           className="no-print"
         >
         <Form 
@@ -424,7 +429,7 @@ const SalesEntryForm = () => {
             benefit_qty: 1,
             type: 'Buy'
           }}
-          size="middle"
+          size="small"
         >
           <Row gutter={16}>
             <Col xs={24} sm={6} md={3}>

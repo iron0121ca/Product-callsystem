@@ -37,6 +37,11 @@
   }
 }
 
+/* Compress Form Item Margins */
+.ant-form-item {
+  margin-bottom: 8px !important;
+}
+
 .counter {
   font-size: 16px;
   padding: 5px 10px;
