@@ -3,12 +3,13 @@ import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { 
   Form, Input, Button, DatePicker, TimePicker, 
-  Select, message, Card, Table, Tag, Row, Col, Space, Popconfirm
+  Select, message, Card, Table, Tag, Row, Col, Space, Popconfirm,
+  ConfigProvider, theme, Switch
 } from 'antd';
 import { 
   PrinterOutlined, EditOutlined, PlusOutlined, 
   SaveOutlined, CloseOutlined, DeleteOutlined,
-  DownloadOutlined
+  DownloadOutlined, SunOutlined, MoonOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import * as XLSX from 'xlsx';
@@ -25,6 +26,25 @@ const SalesEntryForm = () => {
   // --- New State for Form Reuse ---
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
+
+  // --- Dark Mode State ---
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const saved = localStorage.getItem('theme');
+    return saved === 'dark';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+    if (isDarkMode) {
+      document.body.style.backgroundColor = '#000';
+      document.body.style.color = '#fff';
+    } else {
+      document.body.style.backgroundColor = '#fff';
+      document.body.style.color = '#000';
+    }
+  }, [isDarkMode]);
+
+  const { defaultAlgorithm, darkAlgorithm } = theme;
 
   // --- Phone Formatting ---
   const formatPhoneNumber = (value) => {
@@ -303,15 +323,39 @@ const SalesEntryForm = () => {
   ];
 
   return (
-    <div style={{ padding: '8px', background: '#f0f2f5', minHeight: '100vh', width: '100%' }}>
-      {/* Top Section: Entry Form */}
-      <Card 
-        title={isEditing ? "Edit Sale Record" : "Sales Entry"} 
-        variant="outlined"
-        style={{ marginBottom: '8px', width: '100%' }}
-        styles={{ body: { background: '#f0f2f5' } }}
-        className="no-print"
-      >
+    <ConfigProvider
+      theme={{
+        algorithm: isDarkMode ? darkAlgorithm : defaultAlgorithm,
+      }}
+    >
+      <div style={{ 
+        padding: '8px', 
+        background: isDarkMode ? '#000' : '#f0f2f5', 
+        minHeight: '100vh', 
+        width: '100%',
+        transition: 'background 0.3s'
+      }}>
+        {/* Top Section: Entry Form */}
+        <Card 
+          title={isEditing ? "Edit Sale Record" : "Sales Entry"} 
+          extra={
+            <Space className="no-print">
+              <Switch
+                checked={isDarkMode}
+                onChange={(checked) => setIsDarkMode(checked)}
+                checkedChildren={<MoonOutlined />}
+                unCheckedChildren={<SunOutlined />}
+              />
+              <span style={{ color: isDarkMode ? '#fff' : '#000', fontSize: '12px' }}>
+                {isDarkMode ? 'Dark' : 'Light'}
+              </span>
+            </Space>
+          }
+          variant="outlined"
+          style={{ marginBottom: '8px', width: '100%' }}
+          styles={{ body: { background: isDarkMode ? '#141414' : '#f0f2f5' } }}
+          className="no-print"
+        >
         <Form 
           form={form} 
           layout="vertical" 
@@ -507,6 +551,7 @@ const SalesEntryForm = () => {
         </div>
       </Card>
     </div>
+    </ConfigProvider>
   );
 };
 
