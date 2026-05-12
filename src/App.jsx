@@ -346,7 +346,13 @@ const SalesEntryForm = () => {
           alignItems: 'center', 
           padding: '0 8px 8px 8px' 
         }} className="no-print">
-          <h2 style={{ margin: 0, color: isDarkMode ? '#fff' : '#000', fontSize: '24px', fontWeight: 'bold' }}>
+          <h2 style={{ 
+            margin: 0, 
+            color: isDarkMode ? '#fff' : '#000', 
+            fontSize: '24px', 
+            fontWeight: 'bold',
+            fontFamily: "'Roboto', sans-serif" 
+          }}>
             {isEditing ? "Edit Sale Record" : "Sales Entry"}
           </h2>
           <Space>
