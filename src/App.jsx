@@ -4,21 +4,37 @@ import { createClient } from '@supabase/supabase-js';
 import { 
   Form, Input, Button, DatePicker, TimePicker, 
   Select, message, Card, Table, Tag, Row, Col, Space, Popconfirm,
-  ConfigProvider, theme, Switch
+  ConfigProvider, theme, Switch, Menu, Layout
 } from 'antd';
 import { 
   PrinterOutlined, EditOutlined, PlusOutlined, 
   SaveOutlined, CloseOutlined, DeleteOutlined,
   DownloadOutlined, SunOutlined, MoonOutlined,
-  HomeOutlined, UsergroupAddOutlined
+  HomeOutlined, UsergroupAddOutlined, UserAddOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import * as XLSX from 'xlsx';
+import { BrowserRouter, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
+
+const { Header, Content } = Layout;
 
 // 1. Configure Supabase
 const supabase = createClient('https://ishyhtympjphqkaieeud.supabase.co', 'sb_publishable_vtxImjk27hsDa-o10lF-oA_uwe4K7o5');
 
-const SalesEntryForm = () => {
+const Following = ({ isDarkMode }) => (
+  <Card 
+    title="Following" 
+    variant="outlined" 
+    style={{ width: '100%' }}
+  >
+    <div style={{ padding: '100px 20px', textAlign: 'center', color: isDarkMode ? '#aaa' : '#888' }}>
+      <UserAddOutlined style={{ fontSize: '48px', marginBottom: '16px', color: '#87CEEB' }} />
+      <div style={{ fontSize: '18px' }}>Coming Soon: Potential Customer Tracking System</div>
+    </div>
+  </Card>
+);
+
+const Home = ({ isDarkMode }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [dataList, setDataList] = useState([]); // Store data list from DB
@@ -27,26 +43,6 @@ const SalesEntryForm = () => {
   // --- New State for Form Reuse ---
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
-
-  // --- View State ---
-  const [currentView, setCurrentView] = useState('home');
-
-  // --- Dark Mode State ---
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    const saved = localStorage.getItem('theme');
-    return saved === 'dark';
-  });
-
-  useEffect(() => {
-    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
-    if (isDarkMode) {
-      document.body.style.backgroundColor = '#000';
-      document.body.style.color = '#fff';
-    } else {
-      document.body.style.backgroundColor = '#fff';
-      document.body.style.color = '#000';
-    }
-  }, [isDarkMode]);
 
   const { defaultAlgorithm, darkAlgorithm } = theme;
 
@@ -329,19 +325,8 @@ const SalesEntryForm = () => {
   ];
 
   return (
-    <ConfigProvider
-      theme={{
-        algorithm: isDarkMode ? darkAlgorithm : defaultAlgorithm,
-      }}
-    >
-      <div style={{ 
-        padding: '8px', 
-        background: isDarkMode ? '#000' : '#f0f2f5', 
-        minHeight: '100vh', 
-        width: '100%',
-        transition: 'background 0.3s'
-      }}>
-        {/* Top Header: Title and Dark Mode Toggle */}
+    <>
+        {/* Page Title */}
         <div style={{ 
           display: 'flex', 
           justifyContent: 'space-between', 
@@ -357,58 +342,6 @@ const SalesEntryForm = () => {
           }}>
             {isEditing ? "Edit Sale Record" : "Sales Entry"}
           </h2>
-          <Space>
-            <Switch
-              checked={isDarkMode}
-              onChange={(checked) => setIsDarkMode(checked)}
-              checkedChildren={<MoonOutlined />}
-              unCheckedChildren={<SunOutlined />}
-            />
-            <span style={{ color: isDarkMode ? '#fff' : '#000', fontSize: '12px' }}>
-              {isDarkMode ? 'Dark' : 'Light'}
-            </span>
-          </Space>
-        </div>
-
-        {/* Navigation Bar: Placed at the top, below title */}
-        <div style={{ 
-          background: '#87CEEB', 
-          padding: '4px 12px', 
-          marginBottom: '8px', 
-          borderRadius: '8px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-        }} className="no-print">
-          <Button 
-            type="text"
-            size="small"
-            icon={<HomeOutlined />} 
-            style={{ 
-              color: '#fff', 
-              fontWeight: 'bold',
-              backgroundColor: currentView === 'home' ? 'rgba(255,255,255,0.3)' : 'transparent',
-              fontSize: '13px'
-            }}
-            onClick={() => setCurrentView('home')}
-          >
-            Home
-          </Button>
-          <Button 
-            type="text"
-            size="small"
-            icon={<UsergroupAddOutlined />} 
-            style={{ 
-              color: '#fff', 
-              fontWeight: 'bold',
-              backgroundColor: currentView === 'following' ? 'rgba(255,255,255,0.3)' : 'transparent',
-              fontSize: '13px'
-            }}
-            onClick={() => setCurrentView('following')}
-          >
-            Following
-          </Button>
         </div>
 
         {/* Top Section: Entry Form */}
@@ -572,67 +505,147 @@ const SalesEntryForm = () => {
         </Form>
       </Card>
 
-      {/* Bottom Section: Data Table or Following View */}
-      {currentView === 'home' ? (
-        <Card 
-          title="Recent Records" 
-          extra={
-            <Space className="no-print">
-              <Button 
-                icon={<DownloadOutlined />} 
-                onClick={handleExportExcel}
-              >
-                Export Excel
-              </Button>
-              <Button 
-                icon={<PrinterOutlined />} 
-                onClick={() => window.print()}
-              >
-                Print List
-              </Button>
-            </Space>
-          }
-          variant="outlined" 
-          styles={{ body: { padding: 0 } }}
-          style={{ width: '100%' }}
-        >
-          <div style={{ width: '100%', overflowX: 'auto' }}>
-            <Table 
-              dataSource={dataList} 
-              columns={columns.map(col => ({
-                ...col,
-                onCell: () => ({
-                  style: { whiteSpace: 'nowrap' },
-                }),
-                onHeaderCell: () => ({
-                  style: { whiteSpace: 'nowrap' },
-                }),
-              }))} 
-              rowKey={(record, index) => record.id || index} 
-              loading={tableLoading}
-              pagination={{ pageSize: 20 }}
-              size="small"
-              bordered
-              sticky
-              scroll={{ x: 'max-content' }}
-            />
-          </div>
-        </Card>
-      ) : (
-        <Card 
-          title="Following" 
-          variant="outlined" 
-          style={{ width: '100%' }}
-        >
-          <div style={{ padding: '100px 20px', textAlign: 'center', color: isDarkMode ? '#aaa' : '#888' }}>
-            <UsergroupAddOutlined style={{ fontSize: '48px', marginBottom: '16px', color: '#87CEEB' }} />
-            <div style={{ fontSize: '18px' }}>Following View Content coming soon...</div>
-          </div>
-        </Card>
-      )}
-    </div>
+      {/* Bottom Section: Data Table */}
+      <Card 
+        title="Recent Records" 
+        extra={
+          <Space className="no-print">
+            <Button 
+              icon={<DownloadOutlined />} 
+              onClick={handleExportExcel}
+            >
+              Export Excel
+            </Button>
+            <Button 
+              icon={<PrinterOutlined />} 
+              onClick={() => window.print()}
+            >
+              Print List
+            </Button>
+          </Space>
+        }
+        variant="outlined" 
+        styles={{ body: { padding: 0 } }}
+        style={{ width: '100%' }}
+      >
+        <div style={{ width: '100%', overflowX: 'auto' }}>
+          <Table 
+            dataSource={dataList} 
+            columns={columns.map(col => ({
+              ...col,
+              onCell: () => ({
+                style: { whiteSpace: 'nowrap' },
+              }),
+              onHeaderCell: () => ({
+                style: { whiteSpace: 'nowrap' },
+              }),
+            }))} 
+            rowKey={(record, index) => record.id || index} 
+            loading={tableLoading}
+            pagination={{ pageSize: 20 }}
+            size="small"
+            bordered
+            sticky
+            scroll={{ x: 'max-content' }}
+          />
+        </div>
+      </Card>
+    </>
+  );
+};
+
+const Navigation = ({ isDarkMode, setIsDarkMode }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const menuItems = [
+    {
+      key: '/',
+      icon: <HomeOutlined />,
+      label: 'Home',
+      onClick: () => navigate('/'),
+    },
+    {
+      key: '/following',
+      icon: <UserAddOutlined />,
+      label: 'Following',
+      onClick: () => navigate('/following'),
+    },
+  ];
+
+  return (
+    <Header style={{ 
+      position: 'sticky', 
+      top: 0, 
+      zIndex: 1000, 
+      width: '100%', 
+      display: 'flex', 
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: '0 20px',
+      background: isDarkMode ? '#141414' : '#fff',
+      borderBottom: `1px solid ${isDarkMode ? '#333' : '#f0f0f0'}`,
+      height: '48px',
+      lineHeight: '48px'
+    }} className="no-print">
+      <div style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
+        <Menu
+          theme={isDarkMode ? 'dark' : 'light'}
+          mode="horizontal"
+          selectedKeys={[location.pathname]}
+          items={menuItems}
+          style={{ borderBottom: 'none', flex: 1, backgroundColor: 'transparent' }}
+        />
+      </div>
+      <Space>
+        <Switch
+          checked={isDarkMode}
+          onChange={(checked) => setIsDarkMode(checked)}
+          checkedChildren={<MoonOutlined />}
+          unCheckedChildren={<SunOutlined />}
+        />
+        <span style={{ color: isDarkMode ? '#fff' : '#000', fontSize: '12px', marginLeft: '8px' }}>
+          {isDarkMode ? 'Dark' : 'Light'}
+        </span>
+      </Space>
+    </Header>
+  );
+};
+
+const App = () => {
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const saved = localStorage.getItem('theme');
+    return saved === 'dark';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+    if (isDarkMode) {
+      document.body.style.backgroundColor = '#000';
+      document.body.style.color = '#fff';
+    } else {
+      document.body.style.backgroundColor = '#fff';
+      document.body.style.color = '#000';
+    }
+  }, [isDarkMode]);
+
+  const { defaultAlgorithm, darkAlgorithm } = theme;
+
+  return (
+    <ConfigProvider theme={{ algorithm: isDarkMode ? darkAlgorithm : defaultAlgorithm }}>
+      <BrowserRouter>
+        <Layout style={{ minHeight: '100vh', background: isDarkMode ? '#000' : '#f0f2f5' }}>
+          <Navigation isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
+          <Content style={{ padding: '8px' }}>
+            <Routes>
+              <Route path="/" element={<Home isDarkMode={isDarkMode} />} />
+              <Route path="/following" element={<Following isDarkMode={isDarkMode} />} />
+            </Routes>
+          </Content>
+        </Layout>
+      </BrowserRouter>
     </ConfigProvider>
   );
 };
 
-export default SalesEntryForm;
+export default App;
