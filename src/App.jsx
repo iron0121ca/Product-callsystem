@@ -220,11 +220,7 @@ const SalesEntryForm = () => {
         if (error) throw error;
         
         // Optimistic Local State Update
-        setDataList(prev => prev.map(item => 
-          String(item.id) === String(editingId) 
-            ? { ...item, ...dataToSubmit, ...(data?.[0] || {}) } 
-            : item
-        ));
+        setDataList(prev => prev.map(item => String(item.id) === String(editingId) ? { ...item, ...dataToSubmit } : item));
         
         message.success('Record updated successfully!');
       } else {
@@ -266,11 +262,17 @@ const SalesEntryForm = () => {
       title: 'Type', 
       dataIndex: 'type', 
       key: 'type',
-      render: (text) => {
+      render: (text, record) => {
         const typeValue = text || 'N/A';
         let color = 'default';
-        if (typeValue === 'Sell') color = 'green';
-        if (typeValue === 'Buy') color = 'orange';
+        if (typeValue === 'Sell') {
+          if (record.result === 'N/A') color = 'red';
+          else if (record.result === 'Gas Full') color = 'gold';
+          else if (record.result === 'Delivered') color = 'green';
+          else color = 'green'; // Default for Sell if not specified above, or keep green as base
+        } else if (typeValue === 'Buy') {
+          color = 'orange';
+        }
         return <Tag color={color}>{typeValue}</Tag>;
       }
     },
