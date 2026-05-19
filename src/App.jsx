@@ -641,7 +641,7 @@ const App = () => {
           <Content style={{ padding: '8px' }}>
             <Routes>
               <Route path="/" element={<Home isDarkMode={isDarkMode} />} />
-              <Route path="/following" element={<FollowingSandbox />} />
+              <Route path="/following" element={<FollowingSandbox isDarkMode={isDarkMode} />} />
             </Routes>
           </Content>
         </Layout>
