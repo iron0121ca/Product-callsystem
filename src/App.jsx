@@ -110,10 +110,14 @@ const Home = ({ isDarkMode }) => {
     return { value: year.toString(), label: year.toString() };
   });
 
-  const monthOptions = Array.from({ length: 12 }, (_, i) => ({
-    value: (i + 1).toString(),
-    label: `${i + 1}月`
-  }));
+  const monthOptions = [
+    { value: '1', label: 'Jan' }, { value: '2', label: 'Feb' }, 
+    { value: '3', label: 'Mar' }, { value: '4', label: 'Apr' }, 
+    { value: '5', label: 'May' }, { value: '6', label: 'Jun' }, 
+    { value: '7', label: 'Jul' }, { value: '8', label: 'Aug' }, 
+    { value: '9', label: 'Sep' }, { value: '10', label: 'Oct' }, 
+    { value: '11', label: 'Nov' }, { value: '12', label: 'Dec' }
+  ];
 
   // --- Fetch Data Function ---
   const fetchData = async () => {
@@ -258,7 +262,14 @@ const Home = ({ isDarkMode }) => {
       dataIndex: 'month', 
       key: 'month',
       sorter: (a, b) => b.month - a.month,
-      render: (text) => <Tag color="cyan">{text}月</Tag>
+      render: (text) => {
+        const monthMap = {
+          '1': 'Jan', '2': 'Feb', '3': 'Mar', '4': 'Apr',
+          '5': 'May', '6': 'Jun', '7': 'Jul', '8': 'Aug',
+          '9': 'Sep', '10': 'Oct', '11': 'Nov', '12': 'Dec'
+        };
+        return <Tag color="cyan">{monthMap[text] || text}</Tag>;
+      }
     },
     { 
       title: 'Type', 
