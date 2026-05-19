@@ -15,24 +15,12 @@ import {
 import dayjs from 'dayjs';
 import * as XLSX from 'xlsx';
 import { BrowserRouter, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
+import FollowingSandbox from './FollowingSandbox.jsx';
 
 const { Header, Content } = Layout;
 
 // 1. Configure Supabase
 const supabase = createClient('https://ishyhtympjphqkaieeud.supabase.co', 'sb_publishable_vtxImjk27hsDa-o10lF-oA_uwe4K7o5');
-
-const Following = ({ isDarkMode }) => (
-  <Card 
-    title="Following" 
-    variant="outlined" 
-    style={{ width: '100%' }}
-  >
-    <div style={{ padding: '100px 20px', textAlign: 'center', color: isDarkMode ? '#aaa' : '#888' }}>
-      <UserAddOutlined style={{ fontSize: '48px', marginBottom: '16px', color: '#87CEEB' }} />
-      <div style={{ fontSize: '18px' }}>Coming Soon: Potential Customer Tracking System</div>
-    </div>
-  </Card>
-);
 
 const Home = ({ isDarkMode }) => {
   const [form] = Form.useForm();
@@ -654,6 +642,19 @@ const App = () => {
             <Routes>
               <Route path="/" element={<Home isDarkMode={isDarkMode} />} />
               <Route path="/following" element={<Following isDarkMode={isDarkMode} />} />
+            </Routes>
+          </Content>
+        </Layout>
+      </BrowserRouter>
+    </ConfigProvider>
+  );
+};
+
+export default App;ode={setIsDarkMode} />
+          <Content style={{ padding: '8px' }}>
+            <Routes>
+              <Route path="/" element={<Home isDarkMode={isDarkMode} />} />
+              <Route path="/following" element={<FollowingSandbox />} />
             </Routes>
           </Content>
         </Layout>
