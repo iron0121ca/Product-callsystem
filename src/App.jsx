@@ -71,6 +71,9 @@ const Home = ({ isDarkMode }) => {
     // Fill form with record data
     form.setFieldsValue({
       ...record,
+      annual_year: record.annual_year?.toString(),
+      month: record.month?.toString(),
+      year: record.year?.toString(),
       date_of_buy: record.date_of_buy ? dayjs(record.date_of_buy) : null,
       date_delivery: record.date_delivery ? dayjs(record.date_delivery) : null,
       delivery_time: record.delivery_time ? dayjs(record.delivery_time, 'HH:mm:ss') : null,
@@ -87,7 +90,7 @@ const Home = ({ isDarkMode }) => {
     // Restore defaults
     form.setFieldsValue({
       annual_year: dayjs().year().toString(),
-      month: dayjs().format('MMM'),
+      month: (dayjs().month() + 1).toString(),
       year: dayjs().year().toString(),
       result: 'N/A',
       benefit: 'N/A',
@@ -107,10 +110,10 @@ const Home = ({ isDarkMode }) => {
     return { value: year.toString(), label: year.toString() };
   });
 
-  const monthOptions = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-  ].map(m => ({ value: m, label: m }));
+  const monthOptions = Array.from({ length: 12 }, (_, i) => ({
+    value: (i + 1).toString(),
+    label: `${i + 1}月`
+  }));
 
   // --- Fetch Data Function ---
   const fetchData = async () => {
@@ -188,7 +191,7 @@ const Home = ({ isDarkMode }) => {
       // 1. Prepare data with correct types
       const dataToSubmit = {
         annual_year: parseInt(values.annual_year),
-        month: values.month,
+        month: parseInt(values.month),
         type: values.type,
         car_type: values.car_type,
         stock_number: values.stock_number,
@@ -254,7 +257,8 @@ const Home = ({ isDarkMode }) => {
       title: 'Month', 
       dataIndex: 'month', 
       key: 'month',
-      render: (text) => <Tag color="cyan">{text}</Tag>
+      sorter: (a, b) => b.month - a.month,
+      render: (text) => <Tag color="cyan">{text}月</Tag>
     },
     { 
       title: 'Type', 
@@ -364,7 +368,7 @@ const Home = ({ isDarkMode }) => {
           onFinish={onFinish}
           initialValues={{ 
             annual_year: dayjs().year().toString(), 
-            month: dayjs().format('MMM'),
+            month: (dayjs().month() + 1).toString(),
             car_type: 'New',
             year: dayjs().year().toString(),
             result: 'N/A',
