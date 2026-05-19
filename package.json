@@ -12,10 +12,14 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.105.3",
     "antd": "^6.3.7",
+    "autoprefixer": "^10.5.0",
     "dayjs": "^1.11.20",
+    "lucide-react": "^1.16.0",
+    "postcss": "^8.5.14",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "react-router-dom": "^7.15.0",
+    "tailwindcss": "^4.3.0",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

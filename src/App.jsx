@@ -641,19 +641,6 @@ const App = () => {
           <Content style={{ padding: '8px' }}>
             <Routes>
               <Route path="/" element={<Home isDarkMode={isDarkMode} />} />
-              <Route path="/following" element={<Following isDarkMode={isDarkMode} />} />
-            </Routes>
-          </Content>
-        </Layout>
-      </BrowserRouter>
-    </ConfigProvider>
-  );
-};
-
-export default App;ode={setIsDarkMode} />
-          <Content style={{ padding: '8px' }}>
-            <Routes>
-              <Route path="/" element={<Home isDarkMode={isDarkMode} />} />
               <Route path="/following" element={<FollowingSandbox />} />
             </Routes>
           </Content>
