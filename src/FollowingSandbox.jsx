@@ -31,7 +31,6 @@ export default function FollowingSandbox({ isDarkMode }) {
   const initialFormState = {
     first_name: '',
     last_name: '',
-    business_name: '',
     phone_number: '',
     email: '',
     vehicle_brand: '',
@@ -127,7 +126,6 @@ export default function FollowingSandbox({ isDarkMode }) {
     setFormData({
       first_name: item.first_name || '',
       last_name: item.last_name || '',
-      business_name: item.business_name || '',
       phone_number: item.phone_number || '',
       email: item.email || '',
       vehicle_brand: item.vehicle_brand || '',
@@ -187,7 +185,7 @@ export default function FollowingSandbox({ isDarkMode }) {
         {/* Input Form Card */}
         <div className={`${themeClasses.card} rounded-lg border shadow-sm p-6 mb-8`}>
           <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {/* Row 1 */}
               <div>
                 <label className={`block text-xs font-semibold ${themeClasses.label} mb-1 uppercase tracking-wider`}>First Name</label>
@@ -196,10 +194,6 @@ export default function FollowingSandbox({ isDarkMode }) {
               <div>
                 <label className={`block text-xs font-semibold ${themeClasses.label} mb-1 uppercase tracking-wider`}>Last Name</label>
                 <input required name="last_name" value={formData.last_name} onChange={handleInputChange} className={`w-full px-3 py-2 ${themeClasses.input} border rounded outline-none transition-all text-sm`} />
-              </div>
-              <div>
-                <label className={`block text-xs font-semibold ${themeClasses.label} mb-1 uppercase tracking-wider`}>Business Name</label>
-                <input name="business_name" value={formData.business_name} onChange={handleInputChange} className={`w-full px-3 py-2 ${themeClasses.input} border rounded outline-none transition-all text-sm`} />
               </div>
               <div>
                 <label className={`block text-xs font-semibold ${themeClasses.label} mb-1 uppercase tracking-wider`}>Phone Number</label>
@@ -231,7 +225,9 @@ export default function FollowingSandbox({ isDarkMode }) {
                 <label className={`block text-xs font-semibold ${themeClasses.label} mb-1 uppercase tracking-wider`}>Currently Vehicle</label>
                 <input name="currently_vehicle" value={formData.currently_vehicle} onChange={handleInputChange} className={`w-full px-3 py-2 ${themeClasses.input} border rounded outline-none transition-all text-sm`} />
               </div>
-              <div>
+
+              {/* Row 3 - Dates, Memo and Actions */}
+              <div className="lg:col-span-1">
                 <label className={`block text-xs font-semibold ${themeClasses.label} mb-1 uppercase tracking-wider`}>Lien</label>
                 <select name="lien" value={formData.lien} onChange={handleInputChange} className={`w-full px-3 py-2 ${themeClasses.input} border rounded outline-none text-sm`}>
                   <option className={isDarkMode ? 'bg-[#1f1f1f]' : ''}>Cash</option>
@@ -239,20 +235,16 @@ export default function FollowingSandbox({ isDarkMode }) {
                   <option className={isDarkMode ? 'bg-[#1f1f1f]' : ''}>Finance</option>
                 </select>
               </div>
-
-              {/* Row 3 - Dates, Memo and Actions */}
-              <div className="lg:col-span-2 grid grid-cols-2 gap-4">
-                <div>
-                  <label className={`block text-xs font-semibold ${themeClasses.label} mb-1 uppercase tracking-wider`}>Buy Vehicle Date</label>
-                  <input type="date" name="buy_vehicle_date" value={formData.buy_vehicle_date} onChange={handleInputChange} className={`w-full px-3 py-2 ${themeClasses.input} border rounded outline-none transition-all text-sm`} />
-                </div>
-                <div>
-                  <label className={`block text-xs font-semibold ${isDarkMode ? 'text-[#177ddc]' : 'text-blue-600'} mb-1 uppercase tracking-wider`}>Lead Following</label>
-                  <input type="date" name="lead_following" value={formData.lead_following} onChange={handleInputChange} className={`w-full px-3 py-2 ${isDarkMode ? 'bg-[#111b26] border-[#153450] text-[#fff]' : 'bg-blue-50/50 border-blue-200 text-gray-900'} border rounded outline-none transition-all text-sm`} />
-                </div>
+              <div>
+                <label className={`block text-xs font-semibold ${themeClasses.label} mb-1 uppercase tracking-wider`}>Buy Vehicle Date</label>
+                <input type="date" name="buy_vehicle_date" value={formData.buy_vehicle_date} onChange={handleInputChange} className={`w-full px-3 py-2 ${themeClasses.input} border rounded outline-none transition-all text-sm`} />
+              </div>
+              <div>
+                <label className={`block text-xs font-semibold ${isDarkMode ? 'text-[#177ddc]' : 'text-blue-600'} mb-1 uppercase tracking-wider`}>Lead Following</label>
+                <input type="date" name="lead_following" value={formData.lead_following} onChange={handleInputChange} className={`w-full px-3 py-2 ${isDarkMode ? 'bg-[#111b26] border-[#153450] text-[#fff]' : 'bg-blue-50/50 border-blue-200 text-gray-900'} border rounded outline-none transition-all text-sm`} />
               </div>
 
-              <div className="lg:col-span-2">
+              <div className="lg:col-span-1">
                 <label className={`block text-xs font-semibold ${themeClasses.label} mb-1 uppercase tracking-wider`}>Memo</label>
                 <textarea 
                   name="memo" 
@@ -264,26 +256,26 @@ export default function FollowingSandbox({ isDarkMode }) {
                 />
               </div>
 
-              <div className="lg:col-span-1 flex items-end justify-end gap-2">
+              <div className="lg:col-span-4 flex items-end justify-end gap-2 mt-2">
                 {isEditing ? (
                   <>
                     <button 
                       type="button" 
                       onClick={handleCancel}
-                      className={`flex-1 py-2 px-4 rounded text-sm font-semibold transition-colors ${isDarkMode ? 'bg-gray-800 text-gray-300 hover:bg-gray-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                      className={`px-8 py-2 rounded text-sm font-semibold transition-colors ${isDarkMode ? 'bg-gray-800 text-gray-300 hover:bg-gray-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
                     >
                       Cancel
                     </button>
                     <button 
                       type="submit" 
                       disabled={loading}
-                      className={`flex-1 py-2 px-4 rounded text-sm font-semibold transition-colors text-white ${isDarkMode ? 'bg-green-600 hover:bg-green-500' : 'bg-green-500 hover:bg-green-600'} disabled:opacity-50`}
+                      className={`px-8 py-2 rounded text-sm font-semibold transition-colors text-white ${isDarkMode ? 'bg-green-600 hover:bg-green-500' : 'bg-green-500 hover:bg-green-600'} disabled:opacity-50`}
                     >
                       {loading ? '...' : 'Save'}
                     </button>
                   </>
                 ) : (
-                  <button type="submit" disabled={loading} className={`w-full py-2.5 ${isDarkMode ? 'bg-[#177ddc] hover:bg-[#3c9ae8]' : 'bg-[#1677ff] hover:bg-[#4096ff]'} text-white rounded text-sm font-semibold transition-colors shadow-sm disabled:opacity-50`}>
+                  <button type="submit" disabled={loading} className={`px-10 py-2.5 ${isDarkMode ? 'bg-[#177ddc] hover:bg-[#3c9ae8]' : 'bg-[#1677ff] hover:bg-[#4096ff]'} text-white rounded text-sm font-semibold transition-colors shadow-sm disabled:opacity-50`}>
                     {loading ? 'Submitting...' : 'Submit Record'}
                   </button>
                 )}
@@ -301,8 +293,9 @@ export default function FollowingSandbox({ isDarkMode }) {
             <table className="w-full text-sm text-left border-collapse">
               <thead className={`${themeClasses.tableHeader} border-b font-semibold uppercase tracking-wider text-[11px]`}>
                 <tr>
-                  <th className={`px-4 py-3 border-r ${themeClasses.tableCell} w-[100px]`}>Action</th>
-                  <th className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>Name & Business</th>
+                  <th className={`px-4 py-3 border-r ${themeClasses.tableCell} w-[80px]`}>Action</th>
+                  <th className={`px-4 py-3 border-r ${themeClasses.tableCell} w-[180px]`}>Created</th>
+                  <th className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>Name</th>
                   <th className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>Contact</th>
                   <th className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>Desired Vehicle</th>
                   <th className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>Budget & Lien</th>
@@ -314,34 +307,35 @@ export default function FollowingSandbox({ isDarkMode }) {
               </thead>
               <tbody className={`divide-y ${isDarkMode ? 'divide-[#333]' : 'divide-gray-100'}`}>
                 {tableLoading ? (
-                  <tr><td colSpan="9" className={`text-center py-10 ${themeClasses.secondaryText}`}>Loading leads...</td></tr>
+                  <tr><td colSpan="10" className={`text-center py-10 ${themeClasses.secondaryText}`}>Loading leads...</td></tr>
                 ) : dataList.length === 0 ? (
-                  <tr><td colSpan="9" className={`text-center py-10 ${themeClasses.secondaryText}`}>No records found.</td></tr>
+                  <tr><td colSpan="10" className={`text-center py-10 ${themeClasses.secondaryText}`}>No records found.</td></tr>
                 ) : (
                   dataList.map((item) => (
                     <tr key={item.id} className={`${themeClasses.tableRow} transition-colors`}>
                       <td className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-3">
                           <button 
                             onClick={() => handleEdit(item)}
-                            className="flex items-center gap-1 text-blue-500 hover:text-blue-600 transition-colors"
+                            className="text-blue-500 hover:text-blue-600 transition-colors"
                             title="Modify"
                           >
-                            <Pencil size={14} />
-                            <span className="text-xs font-medium">Modify</span>
+                            <Pencil size={16} />
                           </button>
                           <button 
                             onClick={() => handleDelete(item.id)}
                             className="text-red-500 hover:text-red-600 transition-colors"
                             title="Delete"
                           >
-                            <Trash2 size={16} />
+                            <Trash2 size={18} />
                           </button>
                         </div>
                       </td>
+                      <td className={`px-4 py-3 border-r ${themeClasses.tableCell} text-xs ${themeClasses.text}`}>
+                        {item.created_at ? dayjs(item.created_at).format('MMM DD, YYYY, HH:mm') : '-'}
+                      </td>
                       <td className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>
                         <div className={`font-bold ${themeClasses.text}`}>{item.first_name} {item.last_name}</div>
-                        <div className={`${themeClasses.secondaryText} text-xs`}>{item.business_name || '-'}</div>
                       </td>
                       <td className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>
                         <div className={isDarkMode ? 'text-[#fff]' : 'text-gray-700'}>{item.phone_number}</div>
