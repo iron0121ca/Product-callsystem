@@ -362,7 +362,11 @@ export default function FollowingSandbox({ isDarkMode }) {
                         {item.buy_vehicle_date ? dayjs(item.buy_vehicle_date).format('MM/DD/YYYY') : '-'}
                       </td>
                       <td className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>
-                        <div className={`font-bold ${isDarkMode ? 'text-[#177ddc]' : 'text-blue-600'}`}>
+                        <div className={`font-bold ${
+                          dayjs(item.lead_following).isBefore(dayjs(), 'day') || dayjs(item.lead_following).isSame(dayjs(), 'day')
+                            ? (isDarkMode ? 'text-[#ff4d4f]' : 'text-red-600')
+                            : (isDarkMode ? 'text-[#177ddc]' : 'text-blue-600')
+                        }`}>
                           {dayjs(item.lead_following).format('MM/DD/YYYY')}
                         </div>
                       </td>
