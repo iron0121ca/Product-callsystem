@@ -311,70 +311,87 @@ export default function FollowingSandbox({ isDarkMode }) {
                 ) : dataList.length === 0 ? (
                   <tr><td colSpan="10" className={`text-center py-10 ${themeClasses.secondaryText}`}>No records found.</td></tr>
                 ) : (
-                  dataList.map((item) => (
-                    <tr key={item.id} className={`${themeClasses.tableRow} transition-colors`}>
-                      <td className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>
-                        <div className="flex items-center gap-3">
-                          <button 
-                            onClick={() => handleEdit(item)}
-                            className="text-blue-500 hover:text-blue-600 transition-colors"
-                            title="Modify"
-                          >
-                            <Pencil size={16} />
-                          </button>
-                          <button 
-                            onClick={() => handleDelete(item.id)}
-                            className="text-red-500 hover:text-red-600 transition-colors"
-                            title="Delete"
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                        </div>
-                      </td>
-                      <td className={`px-4 py-3 border-r ${themeClasses.tableCell} text-xs ${themeClasses.text}`}>
-                        {item.created_at ? dayjs(item.created_at).format('MMM DD, YYYY, HH:mm') : '-'}
-                      </td>
-                      <td className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>
-                        <div className={`font-bold ${themeClasses.text}`}>{item.first_name} {item.last_name}</div>
-                      </td>
-                      <td className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>
-                        <div className={isDarkMode ? 'text-[#fff]' : 'text-gray-700'}>{item.phone_number}</div>
-                        <div className={`${themeClasses.secondaryText} text-xs`}>{item.email}</div>
-                      </td>
-                      <td className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>
-                        <div className="flex items-center gap-2">
-                          <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${item.condition === 'New' ? (isDarkMode ? 'bg-[#111b26] text-[#177ddc]' : 'bg-blue-100 text-blue-700') : (isDarkMode ? 'bg-[#162312] text-[#49aa19]' : 'bg-green-100 text-green-700')}`}>
-                            {item.condition}
-                          </span>
-                          <span className={`${themeClasses.text} font-medium`}>{item.vehicle_brand}</span>
-                        </div>
-                      </td>
-                      <td className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>
-                        <div className={`font-semibold ${themeClasses.text}`}>
-                          {isNaN(item.budget_amount) ? item.budget_amount : `$${Number(item.budget_amount || 0).toLocaleString()}`}
-                        </div>
-                        <div className={`${isDarkMode ? 'text-[#177ddc]' : 'text-blue-600'} text-[10px] font-bold uppercase`}>{item.lien}</div>
-                      </td>
-                      <td className={`px-4 py-3 border-r ${themeClasses.tableCell} ${isDarkMode ? 'text-[#aaa]' : 'text-gray-600'}`}>
-                        {item.currently_vehicle || '-'}
-                      </td>
-                      <td className={`px-4 py-3 border-r ${themeClasses.tableCell} ${themeClasses.secondaryText}`}>
-                        {item.buy_vehicle_date ? dayjs(item.buy_vehicle_date).format('MM/DD/YYYY') : '-'}
-                      </td>
-                      <td className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>
-                        <div className={`font-bold ${
-                          dayjs(item.lead_following).isBefore(dayjs(), 'day') || dayjs(item.lead_following).isSame(dayjs(), 'day')
-                            ? (isDarkMode ? 'text-[#ff4d4f]' : 'text-red-600')
-                            : (isDarkMode ? 'text-[#177ddc]' : 'text-blue-600')
-                        }`}>
-                          {dayjs(item.lead_following).format('MM/DD/YYYY')}
-                        </div>
-                      </td>
-                      <td className={`px-4 py-3 ${themeClasses.secondaryText} text-xs italic`}>
-                        {item.memo || '-'}
-                      </td>
-                    </tr>
-                  ))
+                  dataList.map((item) => {
+                    // --- Highlight Logic: Today >= Lead Following ---
+                    const today = dayjs().format('YYYY-MM-DD');
+                    const isDue = item.lead_following && !dayjs(today).isBefore(dayjs(item.lead_following), 'day');
+                    
+                    const rowHighlightClass = isDue 
+                      ? (isDarkMode ? 'bg-red-950/30 border-l-4 border-l-red-500' : 'bg-red-50 border-l-4 border-l-red-500') 
+                      : '';
+                    
+                    const textHighlightClass = isDue 
+                      ? (isDarkMode ? 'text-red-400 font-semibold' : 'text-red-700 font-semibold') 
+                      : themeClasses.text;
+
+                    const iconHighlightClass = isDue ? 'text-red-500' : 'text-blue-500';
+
+                    return (
+                      <tr key={item.id} className={`${themeClasses.tableRow} ${rowHighlightClass} transition-colors`}>
+                        <td className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>
+                          <div className="flex items-center gap-3">
+                            <button 
+                              onClick={() => handleEdit(item)}
+                              className={`${isDue ? 'text-red-500 hover:text-red-400' : 'text-blue-500 hover:text-blue-600'} transition-colors`}
+                              title="Modify"
+                            >
+                              <Pencil size={16} />
+                            </button>
+                            <button 
+                              onClick={() => handleDelete(item.id)}
+                              className={`${isDue ? 'text-red-400 hover:text-red-300' : 'text-red-500 hover:text-red-600'} transition-colors`}
+                              title="Delete"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </div>
+                        </td>
+                        <td className={`px-4 py-3 border-r ${themeClasses.tableCell} text-xs ${isDue ? (isDarkMode ? 'text-red-300/70' : 'text-red-800/70') : themeClasses.text}`}>
+                          {item.created_at ? dayjs(item.created_at).format('MMM DD, YYYY, HH:mm') : '-'}
+                        </td>
+                        <td className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>
+                          <div className={`font-bold ${textHighlightClass}`}>{item.first_name} {item.last_name}</div>
+                        </td>
+                        <td className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>
+                          <div className={isDue ? (isDarkMode ? 'text-red-200' : 'text-red-800') : (isDarkMode ? 'text-[#fff]' : 'text-gray-700')}>{item.phone_number}</div>
+                          <div className={`${isDue ? (isDarkMode ? 'text-red-400/60' : 'text-red-600/60') : themeClasses.secondaryText} text-xs`}>{item.email}</div>
+                        </td>
+                        <td className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>
+                          <div className="flex items-center gap-2">
+                            <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${
+                              item.condition === 'New' 
+                                ? (isDarkMode ? 'bg-[#111b26] text-[#177ddc]' : 'bg-blue-100 text-blue-700') 
+                                : (isDarkMode ? 'bg-[#162312] text-[#49aa19]' : 'bg-green-100 text-green-700')
+                            } ${isDue ? 'ring-1 ring-red-400/50' : ''}`}>
+                              {item.condition}
+                            </span>
+                            <span className={`${isDue ? textHighlightClass : themeClasses.text} font-medium`}>{item.vehicle_brand}</span>
+                          </div>
+                        </td>
+                        <td className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>
+                          <div className={`font-semibold ${isDue ? textHighlightClass : themeClasses.text}`}>
+                            {isNaN(item.budget_amount) ? item.budget_amount : `$${Number(item.budget_amount || 0).toLocaleString()}`}
+                          </div>
+                          <div className={`${isDue ? (isDarkMode ? 'text-red-400' : 'text-red-600') : (isDarkMode ? 'text-[#177ddc]' : 'text-blue-600')} text-[10px] font-bold uppercase`}>{item.lien}</div>
+                        </td>
+                        <td className={`px-4 py-3 border-r ${themeClasses.tableCell} ${isDue ? (isDarkMode ? 'text-red-300' : 'text-red-700') : (isDarkMode ? 'text-[#aaa]' : 'text-gray-600')}`}>
+                          {item.currently_vehicle || '-'}
+                        </td>
+                        <td className={`px-4 py-3 border-r ${themeClasses.tableCell} ${isDue ? (isDarkMode ? 'text-red-400/60' : 'text-red-600/60') : themeClasses.secondaryText}`}>
+                          {item.buy_vehicle_date ? dayjs(item.buy_vehicle_date).format('MM/DD/YYYY') : '-'}
+                        </td>
+                        <td className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>
+                          <div className={`font-bold ${isDue ? (isDarkMode ? 'text-red-400' : 'text-red-600') : (isDarkMode ? 'text-[#177ddc]' : 'text-blue-600')}`}>
+                            {dayjs(item.lead_following).format('MM/DD/YYYY')}
+                          </div>
+                          {isDue && <div className="text-[9px] uppercase font-black text-red-500 mt-0.5 animate-pulse">Action Required</div>}
+                        </td>
+                        <td className={`px-4 py-3 ${isDue ? (isDarkMode ? 'text-red-300/70' : 'text-red-700/70') : themeClasses.secondaryText} text-xs italic`}>
+                          {item.memo || '-'}
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
