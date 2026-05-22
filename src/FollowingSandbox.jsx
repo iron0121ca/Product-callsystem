@@ -98,6 +98,7 @@ export default function FollowingSandbox({ isDarkMode }) {
         if (error) throw error;
       }
       
+      // Clear edit state and force fresh fetch
       handleCancel();
       await fetchData();
     } catch (error) {
@@ -319,11 +320,14 @@ export default function FollowingSandbox({ isDarkMode }) {
                     const dd = String(todayObj.getDate()).padStart(2, '0');
                     const localTodayStr = `${yyyy}-${mm}-${dd}`;
                     
-                    // --- Highlight Condition: localTodayStr >= lead_following ---
-                    const isDue = item.lead_following && localTodayStr >= item.lead_following;
+                    // --- Ultimate Date Cleaning: Splitting by space or T to keep only YYYY-MM-DD ---
+                    const cleanLeadFollowing = item.lead_following ? item.lead_following.split(' ')[0].split('T')[0] : '';
+                    
+                    // --- Highlight Condition: localTodayStr >= cleanLeadFollowing ---
+                    const isDue = cleanLeadFollowing && localTodayStr >= cleanLeadFollowing;
                     
                     const rowHighlightClass = isDue 
-                      ? (isDarkMode ? 'bg-red-950/30 border-l-4 border-l-red-500' : 'bg-red-50 border-l-4 border-l-red-500') 
+                      ? (isDarkMode ? 'bg-red-950/30 border-l-4 border-l-red-500' : 'bg-red-50/60 hover:bg-red-50 border-l-4 border-l-red-500') 
                       : '';
                     
                     const textHighlightClass = isDue 
