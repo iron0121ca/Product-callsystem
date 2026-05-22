@@ -344,23 +344,30 @@ const Home = ({ isDarkMode }) => {
 
   return (
     <>
-        {/* Page Title */}
+        {/* Page Title & Header Stats */}
         <div style={{ 
           display: 'flex', 
           justifyContent: 'space-between', 
           alignItems: 'center', 
           padding: '0 8px 8px 8px' 
         }} className="no-print">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <h2 style={{ 
-              margin: 0, 
-              color: isDarkMode ? '#fff' : '#000', 
-              fontSize: '24px', 
-              fontWeight: 'bold',
-              fontFamily: "'Roboto', sans-serif" 
-            }}>
-              {isEditing ? "Edit Sale Record" : "Sales Entry"}
-            </h2>
+          <h2 style={{ 
+            margin: 0, 
+            color: isDarkMode ? '#fff' : '#000', 
+            fontSize: '24px', 
+            fontWeight: 'bold',
+            fontFamily: "'Roboto', sans-serif" 
+          }}>
+            {isEditing ? "Edit Sale Record" : "Sales Entry"}
+          </h2>
+
+          {/* Dynamic Stats Badge - Positioned at far right */}
+          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-bold shadow-sm border ${
+            isDarkMode 
+              ? 'bg-blue-900/30 text-blue-300 border-blue-800' 
+              : 'bg-blue-50 text-blue-700 border-blue-100'
+          }`}>
+            <span>📊 Total Sold: <span className="text-lg">{totalCars}</span> Units</span>
           </div>
         </div>
 
@@ -541,15 +548,6 @@ const Home = ({ isDarkMode }) => {
         title="Recent Records" 
         extra={
           <div className="flex items-center gap-3 no-print">
-            {/* Dynamic Stats Badge - Simplified & English */}
-            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-bold shadow-sm border ${
-              isDarkMode 
-                ? 'bg-blue-900/30 text-blue-300 border-blue-800' 
-                : 'bg-blue-50 text-blue-700 border-blue-100'
-            }`}>
-              <span>📊 Total Sold: <span className="text-lg">{totalCars}</span> Units</span>
-            </div>
-
             {/* Filter Group */}
             <Select 
               value={selectedYear} 
