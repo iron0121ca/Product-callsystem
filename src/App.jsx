@@ -4,13 +4,14 @@ import { createClient } from '@supabase/supabase-js';
 import { 
   Form, Input, Button, DatePicker, TimePicker, 
   Select, message, Card, Table, Tag, Row, Col, Space, Popconfirm,
-  ConfigProvider, theme, Switch, Menu, Layout
+  ConfigProvider, theme, Switch, Menu, Layout, InputNumber
 } from 'antd';
 import { 
   PrinterOutlined, EditOutlined, PlusOutlined, 
   SaveOutlined, CloseOutlined, DeleteOutlined,
   DownloadOutlined, SunOutlined, MoonOutlined,
-  HomeOutlined, UsergroupAddOutlined, UserAddOutlined
+  HomeOutlined, UsergroupAddOutlined, UserAddOutlined,
+  BarChartOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import * as XLSX from 'xlsx';
@@ -31,6 +32,10 @@ const Home = ({ isDarkMode }) => {
   // --- New State for Form Reuse ---
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
+
+  // --- Filter State ---
+  const [selectedYear, setSelectedYear] = useState(dayjs().year().toString());
+  const [selectedMonth, setSelectedMonth] = useState((dayjs().month() + 1).toString());
 
   const { defaultAlgorithm, darkAlgorithm } = theme;
 
@@ -65,6 +70,7 @@ const Home = ({ isDarkMode }) => {
       date_of_buy: record.date_of_buy ? dayjs(record.date_of_buy) : null,
       date_delivery: record.date_delivery ? dayjs(record.date_delivery) : null,
       delivery_time: record.delivery_time ? dayjs(record.delivery_time, 'HH:mm:ss') : null,
+      sale_amount: record.sale_amount,
     });
 
     // Scroll to top
@@ -83,15 +89,22 @@ const Home = ({ isDarkMode }) => {
       result: 'N/A',
       benefit: 'N/A',
       benefit_qty: 1,
-      type: 'Buy'
+      type: 'Buy',
+      sale_amount: 0
     });
   };
 
   // --- Generate Options ---
-  const annualYearOptions = Array.from({ length: 2050 - 2024 + 1 }, (_, i) => {
-    const year = 2024 + i;
-    return { value: year.toString(), label: year.toString() };
-  });
+  const annualYearOptions = [
+    { value: 'all', label: 'All Years' },
+    { value: '2026', label: '2026' },
+    { value: '2025', label: '2025' },
+    { value: '2024', label: '2024' },
+    ...Array.from({ length: 2050 - 2027 + 1 }, (_, i) => {
+      const year = 2027 + i;
+      return { value: year.toString(), label: year.toString() };
+    })
+  ];
 
   const yearOptions = Array.from({ length: 2030 - 1900 + 1 }, (_, i) => {
     const year = 1900 + i;
@@ -119,7 +132,7 @@ const Home = ({ isDarkMode }) => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setDataList(data);
+      setDataList(data || []);
     } catch (error) {
       message.error('Failed to fetch list: ' + error.message);
     } finally {
@@ -131,9 +144,20 @@ const Home = ({ isDarkMode }) => {
     fetchData();
   }, []);
 
+  // --- Dynamic Filtering Logic ---
+  const filteredData = dataList.filter(item => {
+    const yearMatch = selectedYear === 'all' || item.annual_year?.toString() === selectedYear;
+    const monthMatch = selectedMonth === 'all' || item.month?.toString() === selectedMonth;
+    return yearMatch && monthMatch;
+  });
+
+  // --- Real-time Stats Calculation ---
+  const totalCars = filteredData.length;
+  const totalSalesAmount = filteredData.reduce((sum, item) => sum + (Number(item.sale_amount) || 0), 0);
+
   // --- Export Excel Logic ---
   const handleExportExcel = () => {
-    const exportData = dataList.map(item => ({
+    const exportData = filteredData.map(item => ({
       'Annual': item.annual_year,
       'Month': item.month,
       'Type': item.type,
@@ -141,6 +165,7 @@ const Home = ({ isDarkMode }) => {
       'StockNo': item.stock_number,
       'CustomerName': item.name,
       'Contact': item.contact_number,
+      'Amount': item.sale_amount,
       'Year': item.year,
       'Brand': item.brand,
       'Model': item.model,
@@ -178,9 +203,7 @@ const Home = ({ isDarkMode }) => {
 
   const onFinish = async (values) => {
     setLoading(true);
-    console.log('Submitting data:', values);
     try {
-      // 1. Prepare data with correct types
       const dataToSubmit = {
         annual_year: parseInt(values.annual_year),
         month: parseInt(values.month),
@@ -189,6 +212,7 @@ const Home = ({ isDarkMode }) => {
         stock_number: values.stock_number,
         name: values.name,
         contact_number: values.contact_number,
+        sale_amount: parseFloat(values.sale_amount) || 0,
         year: parseInt(values.year),
         brand: values.brand,
         model: values.model,
@@ -203,28 +227,20 @@ const Home = ({ isDarkMode }) => {
       };
 
       if (isEditing) {
-        console.log('Updating record ID:', editingId);
-        const { data, error } = await supabase
+        const { error } = await supabase
           .from('sales_records')
           .update(dataToSubmit)
-          .eq('id', editingId)
-          .select();
+          .eq('id', editingId);
         
         if (error) throw error;
-        
-        // Optimistic Local State Update
-        setDataList(prev => prev.map(item => String(item.id) === String(editingId) ? { ...item, ...dataToSubmit } : item));
-        
         message.success('Record updated successfully!');
       } else {
-        const { data, error } = await supabase
+        const { error } = await supabase
           .from('sales_records')
-          .insert([dataToSubmit])
-          .select();
+          .insert([dataToSubmit]);
         
         if (error) throw error;
         message.success('New record added successfully!');
-        if (data) setDataList(prev => [data[0], ...prev]);
       }
 
       handleCancelEdit(); 
@@ -267,7 +283,7 @@ const Home = ({ isDarkMode }) => {
           if (record.result === 'N/A') color = 'red';
           else if (record.result === 'Gas Full') color = 'gold';
           else if (record.result === 'Delivered') color = 'green';
-          else color = 'green'; // Default for Sell if not specified above, or keep green as base
+          else color = 'green';
         } else if (typeValue === 'Buy') {
           color = 'orange';
         }
@@ -278,13 +294,18 @@ const Home = ({ isDarkMode }) => {
     { title: 'Stock#', dataIndex: 'stock_number', key: 'stock_number' },
     { title: 'Customer Name', dataIndex: 'name', key: 'name' },
     { title: 'Contact', dataIndex: 'contact_number', key: 'contact_number' },
+    { 
+      title: 'Amount', 
+      dataIndex: 'sale_amount', 
+      key: 'sale_amount',
+      render: (val) => val ? `$${val.toLocaleString()}` : '-'
+    },
     { title: 'Year', dataIndex: 'year', key: 'year' },
     { title: 'Brand', dataIndex: 'brand', key: 'brand' },
     { title: 'Model', dataIndex: 'model', key: 'model' },
     { title: 'Color', dataIndex: 'color', key: 'color' },
     { title: 'Purchase Date', dataIndex: 'date_of_buy', key: 'date_of_buy' },
     { title: 'Delivery Date', dataIndex: 'date_delivery', key: 'date_delivery' },
-    { title: 'Delivery Time', dataIndex: 'delivery_time', key: 'delivery_time' },
     { title: 'Status', dataIndex: 'result', key: 'result' },
     { title: 'Benefit', dataIndex: 'benefit', key: 'benefit' },
     { title: 'Qty', dataIndex: 'benefit_qty', key: 'benefit_qty' },
@@ -324,22 +345,34 @@ const Home = ({ isDarkMode }) => {
 
   return (
     <>
-        {/* Page Title */}
+        {/* Page Title & Stats Badge */}
         <div style={{ 
           display: 'flex', 
           justifyContent: 'space-between', 
           alignItems: 'center', 
           padding: '0 8px 8px 8px' 
         }} className="no-print">
-          <h2 style={{ 
-            margin: 0, 
-            color: isDarkMode ? '#fff' : '#000', 
-            fontSize: '24px', 
-            fontWeight: 'bold',
-            fontFamily: "'Roboto', sans-serif" 
-          }}>
-            {isEditing ? "Edit Sale Record" : "Sales Entry"}
-          </h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <h2 style={{ 
+              margin: 0, 
+              color: isDarkMode ? '#fff' : '#000', 
+              fontSize: '24px', 
+              fontWeight: 'bold',
+              fontFamily: "'Roboto', sans-serif" 
+            }}>
+              {isEditing ? "Edit Sale Record" : "Sales Entry"}
+            </h2>
+            
+            {/* Dynamic Stats Badge */}
+            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold shadow-sm border ${
+              isDarkMode 
+                ? 'bg-blue-900/30 text-blue-300 border-blue-800' 
+                : 'bg-blue-50 text-blue-700 border-blue-100'
+            }`}>
+              <BarChartOutlined />
+              <span>📊 当前筛选：共销车 <span className="text-lg">{totalCars}</span> 台 | 销售额总计 <span className="text-lg">${totalSalesAmount.toLocaleString()}</span></span>
+            </div>
+          </div>
         </div>
 
         {/* Top Section: Entry Form */}
@@ -366,14 +399,15 @@ const Home = ({ isDarkMode }) => {
             result: 'N/A',
             benefit: 'N/A',
             benefit_qty: 1,
-            type: 'Buy'
+            type: 'Buy',
+            sale_amount: 0
           }}
           size="small"
         >
           <Row gutter={16}>
             <Col xs={24} sm={6} md={3}>
               <Form.Item name="annual_year" label="Annual" rules={[{ required: true }]}>
-                <Select options={annualYearOptions} />
+                <Select options={annualYearOptions.filter(opt => opt.value !== 'all')} />
               </Form.Item>
             </Col>
             <Col xs={24} sm={6} md={3}>
@@ -412,6 +446,16 @@ const Home = ({ isDarkMode }) => {
                 <Input placeholder="(604) 783-6903" onChange={handleContactChange} />
               </Form.Item>
             </Col>
+            <Col xs={24} sm={12} md={4}>
+              <Form.Item name="sale_amount" label="Sale Amount ($)">
+                <InputNumber 
+                  style={{ width: '100%' }} 
+                  formatter={value => `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                  parser={value => value.replace(/\$\s?|(,*)/g, '')}
+                  placeholder="25000"
+                />
+              </Form.Item>
+            </Col>
             <Col xs={12} sm={6} md={3}>
               <Form.Item name="year" label="Year">
                 <Select options={yearOptions} />
@@ -427,12 +471,15 @@ const Home = ({ isDarkMode }) => {
                 <Input placeholder="Civic" />
               </Form.Item>
             </Col>
-            <Col xs={12} sm={12} md={3}>
+            <Col xs={12} sm={12} md={4}>
               <Form.Item name="color" label="Color">
                 <Input placeholder="Red" />
               </Form.Item>
             </Col>
-            <Col xs={24} sm={8} md={2}>
+          </Row>
+
+          <Row gutter={16}>
+            <Col xs={24} sm={8} md={3}>
               <Form.Item name="date_of_buy" label="Buy Date">
                 <DatePicker style={{ width: '100%' }} />
               </Form.Item>
@@ -442,9 +489,6 @@ const Home = ({ isDarkMode }) => {
                 <DatePicker style={{ width: '100%' }} />
               </Form.Item>
             </Col>
-          </Row>
-
-          <Row gutter={16}>
             <Col xs={24} sm={8} md={3}>
               <Form.Item name="delivery_time" label="Deliv. Time">
                 <TimePicker format="HH:mm" style={{ width: '100%' }} />
@@ -475,9 +519,9 @@ const Home = ({ isDarkMode }) => {
                 <Select options={Array.from({ length: 11 }, (_, i) => ({ value: i, label: i.toString() }))} />
               </Form.Item>
             </Col>
-            <Col xs={24} sm={24} md={9}>
+            <Col xs={24} sm={24} md={3}>
               <Form.Item name="part_incentive" label="Remarks">
-                <Input placeholder="e.g. Mention 2 oil changes to manager..." />
+                <Input placeholder="Notes..." />
               </Form.Item>
             </Col>
           </Row>
@@ -507,20 +551,41 @@ const Home = ({ isDarkMode }) => {
       <Card 
         title="Recent Records" 
         extra={
-          <Space className="no-print">
-            <Button 
-              icon={<DownloadOutlined />} 
-              onClick={handleExportExcel}
-            >
-              Export Excel
-            </Button>
-            <Button 
-              icon={<PrinterOutlined />} 
-              onClick={() => window.print()}
-            >
-              Print List
-            </Button>
-          </Space>
+          <div className="flex items-center gap-3 no-print">
+            {/* Filter Group */}
+            <Select 
+              value={selectedYear} 
+              onChange={setSelectedYear}
+              style={{ width: 110 }}
+              options={annualYearOptions}
+              placeholder="Year"
+            />
+            <Select 
+              value={selectedMonth} 
+              onChange={setSelectedMonth}
+              style={{ width: 120 }}
+              options={[
+                { value: 'all', label: 'All Months' },
+                ...monthOptions
+              ]}
+              placeholder="Month"
+            />
+            
+            <Space>
+              <Button 
+                icon={<DownloadOutlined />} 
+                onClick={handleExportExcel}
+              >
+                Export Excel
+              </Button>
+              <Button 
+                icon={<PrinterOutlined />} 
+                onClick={() => window.print()}
+              >
+                Print List
+              </Button>
+            </Space>
+          </div>
         }
         variant="outlined" 
         styles={{ body: { padding: 0 } }}
@@ -528,7 +593,7 @@ const Home = ({ isDarkMode }) => {
       >
         <div style={{ width: '100%', overflowX: 'auto' }}>
           <Table 
-            dataSource={dataList} 
+            dataSource={filteredData} 
             columns={columns.map(col => ({
               ...col,
               onCell: () => ({
