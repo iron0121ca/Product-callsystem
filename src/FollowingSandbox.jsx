@@ -52,7 +52,7 @@ export default function FollowingSandbox({ isDarkMode }) {
       const { data, error } = await supabase
         .from('following_customers')
         .select('*')
-        .order('lead_following', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       setDataList(data || []);

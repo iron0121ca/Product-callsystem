@@ -301,9 +301,7 @@ const Home = ({ isDarkMode }) => {
             size="small" 
             onClick={() => handleEdit(record)}
             disabled={isEditing && editingId === record.id}
-          >
-            Edit
-          </Button>
+          />
           <Popconfirm
             title="Delete this record?"
             description="Are you sure you want to delete this record?"
@@ -317,9 +315,7 @@ const Home = ({ isDarkMode }) => {
               icon={<DeleteOutlined />} 
               size="small"
               disabled={isEditing && editingId === record.id}
-            >
-              Delete
-            </Button>
+            />
           </Popconfirm>
         </Space>
       ),
