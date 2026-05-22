@@ -312,9 +312,15 @@ export default function FollowingSandbox({ isDarkMode }) {
                   <tr><td colSpan="10" className={`text-center py-10 ${themeClasses.secondaryText}`}>No records found.</td></tr>
                 ) : (
                   dataList.map((item) => {
-                    // --- Highlight Logic: Today >= Lead Following ---
-                    const today = dayjs().format('YYYY-MM-DD');
-                    const isDue = item.lead_following && !dayjs(today).isBefore(dayjs(item.lead_following), 'day');
+                    // --- Precise Local Date Logic ---
+                    const todayObj = new Date();
+                    const yyyy = todayObj.getFullYear();
+                    const mm = String(todayObj.getMonth() + 1).padStart(2, '0');
+                    const dd = String(todayObj.getDate()).padStart(2, '0');
+                    const localTodayStr = `${yyyy}-${mm}-${dd}`;
+                    
+                    // --- Highlight Condition: localTodayStr >= lead_following ---
+                    const isDue = item.lead_following && localTodayStr >= item.lead_following;
                     
                     const rowHighlightClass = isDue 
                       ? (isDarkMode ? 'bg-red-950/30 border-l-4 border-l-red-500' : 'bg-red-50 border-l-4 border-l-red-500') 
@@ -323,8 +329,6 @@ export default function FollowingSandbox({ isDarkMode }) {
                     const textHighlightClass = isDue 
                       ? (isDarkMode ? 'text-red-400 font-semibold' : 'text-red-700 font-semibold') 
                       : themeClasses.text;
-
-                    const iconHighlightClass = isDue ? 'text-red-500' : 'text-blue-500';
 
                     return (
                       <tr key={item.id} className={`${themeClasses.tableRow} ${rowHighlightClass} transition-colors`}>
