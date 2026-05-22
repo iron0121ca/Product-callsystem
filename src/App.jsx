@@ -153,7 +153,6 @@ const Home = ({ isDarkMode }) => {
 
   // --- Real-time Stats Calculation ---
   const totalCars = filteredData.length;
-  const totalSalesAmount = filteredData.reduce((sum, item) => sum + (Number(item.sale_amount) || 0), 0);
 
   // --- Export Excel Logic ---
   const handleExportExcel = () => {
@@ -345,7 +344,7 @@ const Home = ({ isDarkMode }) => {
 
   return (
     <>
-        {/* Page Title & Stats Badge */}
+        {/* Page Title */}
         <div style={{ 
           display: 'flex', 
           justifyContent: 'space-between', 
@@ -362,16 +361,6 @@ const Home = ({ isDarkMode }) => {
             }}>
               {isEditing ? "Edit Sale Record" : "Sales Entry"}
             </h2>
-            
-            {/* Dynamic Stats Badge */}
-            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold shadow-sm border ${
-              isDarkMode 
-                ? 'bg-blue-900/30 text-blue-300 border-blue-800' 
-                : 'bg-blue-50 text-blue-700 border-blue-100'
-            }`}>
-              <BarChartOutlined />
-              <span>📊 当前筛选：共销车 <span className="text-lg">{totalCars}</span> 台 | 销售额总计 <span className="text-lg">${totalSalesAmount.toLocaleString()}</span></span>
-            </div>
           </div>
         </div>
 
@@ -552,6 +541,15 @@ const Home = ({ isDarkMode }) => {
         title="Recent Records" 
         extra={
           <div className="flex items-center gap-3 no-print">
+            {/* Dynamic Stats Badge - Simplified & English */}
+            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-bold shadow-sm border ${
+              isDarkMode 
+                ? 'bg-blue-900/30 text-blue-300 border-blue-800' 
+                : 'bg-blue-50 text-blue-700 border-blue-100'
+            }`}>
+              <span>📊 Total Sold: <span className="text-lg">{totalCars}</span> Units</span>
+            </div>
+
             {/* Filter Group */}
             <Select 
               value={selectedYear} 
