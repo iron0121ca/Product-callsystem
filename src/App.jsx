@@ -39,6 +39,12 @@ const Home = ({ isDarkMode }) => {
 
   const { defaultAlgorithm, darkAlgorithm } = theme;
 
+  // --- UI Constants for Refactoring ---
+  const inputClasses = `h-10 px-3 border border-slate-200 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full transition-all`;
+  const selectClasses = `${inputClasses} pr-8`;
+  const labelClasses = "text-xs font-medium text-slate-500 ml-1";
+  const fieldWrapperClasses = "flex flex-col gap-1.5";
+
   // --- Phone Formatting ---
   const formatPhoneNumber = (value) => {
     if (!value) return value;
@@ -67,10 +73,9 @@ const Home = ({ isDarkMode }) => {
       annual_year: record.annual_year?.toString(),
       month: record.month?.toString(),
       year: record.year?.toString(),
-      date_of_buy: record.date_of_buy ? dayjs(record.date_of_buy) : null,
-      date_delivery: record.date_delivery ? dayjs(record.date_delivery) : null,
-      delivery_time: record.delivery_time ? dayjs(record.delivery_time, 'HH:mm:ss') : null,
-      sale_amount: record.sale_amount,
+      date_of_buy: record.date_of_buy || null,
+      date_delivery: record.date_delivery || null,
+      delivery_time: record.delivery_time || null,
     });
 
     // Scroll to top
@@ -90,7 +95,9 @@ const Home = ({ isDarkMode }) => {
       benefit: 'N/A',
       benefit_qty: 1,
       type: 'Buy',
-      sale_amount: 0
+      date_of_buy: null,
+      date_delivery: null,
+      delivery_time: null
     });
   };
 
@@ -164,7 +171,6 @@ const Home = ({ isDarkMode }) => {
       'StockNo': item.stock_number,
       'CustomerName': item.name,
       'Contact': item.contact_number,
-      'Amount': item.sale_amount,
       'Year': item.year,
       'Brand': item.brand,
       'Model': item.model,
@@ -211,14 +217,13 @@ const Home = ({ isDarkMode }) => {
         stock_number: values.stock_number,
         name: values.name,
         contact_number: values.contact_number,
-        sale_amount: parseFloat(values.sale_amount) || 0,
         year: parseInt(values.year),
         brand: values.brand,
         model: values.model,
         color: values.color,
-        date_of_buy: values.date_of_buy ? values.date_of_buy.format('YYYY-MM-DD') : null,
-        date_delivery: values.date_delivery ? values.date_delivery.format('YYYY-MM-DD') : null,
-        delivery_time: values.delivery_time ? values.delivery_time.format('HH:mm:ss') : null,
+        date_of_buy: values.date_of_buy ? (dayjs.isDayjs(values.date_of_buy) ? values.date_of_buy.format('YYYY-MM-DD') : values.date_of_buy) : null,
+        date_delivery: values.date_delivery ? (dayjs.isDayjs(values.date_delivery) ? values.date_delivery.format('YYYY-MM-DD') : values.date_delivery) : null,
+        delivery_time: values.delivery_time ? (dayjs.isDayjs(values.delivery_time) ? values.delivery_time.format('HH:mm:ss') : values.delivery_time) : null,
         result: values.result,
         benefit: values.benefit,
         benefit_qty: values.benefit_qty,
@@ -293,12 +298,6 @@ const Home = ({ isDarkMode }) => {
     { title: 'Stock#', dataIndex: 'stock_number', key: 'stock_number' },
     { title: 'Customer Name', dataIndex: 'name', key: 'name' },
     { title: 'Contact', dataIndex: 'contact_number', key: 'contact_number' },
-    { 
-      title: 'Amount', 
-      dataIndex: 'sale_amount', 
-      key: 'sale_amount',
-      render: (val) => val ? `$${val.toLocaleString()}` : '-'
-    },
     { title: 'Year', dataIndex: 'year', key: 'year' },
     { title: 'Brand', dataIndex: 'brand', key: 'brand' },
     { title: 'Model', dataIndex: 'model', key: 'model' },
@@ -395,132 +394,187 @@ const Home = ({ isDarkMode }) => {
             result: 'N/A',
             benefit: 'N/A',
             benefit_qty: 1,
-            type: 'Buy',
-            sale_amount: 0
+            type: 'Buy'
           }}
           size="small"
         >
-          <Row gutter={16}>
-            <Col xs={24} sm={6} md={3}>
-              <Form.Item name="annual_year" label="Annual" rules={[{ required: true }]}>
-                <Select options={annualYearOptions.filter(opt => opt.value !== 'all')} />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-6">
+            {/* Annual */}
+            <div className={fieldWrapperClasses}>
+              <label className={labelClasses}>Annual</label>
+              <Form.Item name="annual_year" rules={[{ required: true }]} noStyle>
+                <select className={selectClasses}>
+                  {annualYearOptions.filter(opt => opt.value !== 'all').map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
               </Form.Item>
-            </Col>
-            <Col xs={24} sm={6} md={3}>
-              <Form.Item name="month" label="Month" rules={[{ required: true }]}>
-                <Select options={monthOptions} />
-              </Form.Item>
-            </Col>
-            <Col xs={24} sm={6} md={3}>
-              <Form.Item name="type" label="Type" rules={[{ required: true }]}>
-                <Select options={[
-                  { value: 'Buy', label: 'Buy' },
-                  { value: 'Sell', label: 'Sell' },
-                ]} />
-              </Form.Item>
-            </Col>
-            <Col xs={24} sm={6} md={3}>
-              <Form.Item name="car_type" label="Condition" rules={[{ required: true }]}>
-                <Select options={[{value:'New', label:'New'}, {value:'Used', label:'Used'}]} />
-              </Form.Item>
-            </Col>
-            <Col xs={24} sm={12} md={4}>
-              <Form.Item name="stock_number" label="Stock#" rules={[{ required: true }]}>
-                <Input placeholder="H25XXX" />
-              </Form.Item>
-            </Col>
-            <Col xs={24} sm={24} md={5}>
-              <Form.Item name="name" label="Customer Name" rules={[{ required: true }]}>
-                <Input placeholder="e.g. Ming Lo Kim" />
-              </Form.Item>
-            </Col>
-          </Row>
+            </div>
 
-          <Row gutter={16}>
-            <Col xs={24} sm={12} md={6}>
-              <Form.Item name="contact_number" label="Contact">
-                <Input placeholder="(604) 783-6903" onChange={handleContactChange} />
+            {/* Month */}
+            <div className={fieldWrapperClasses}>
+              <label className={labelClasses}>Month</label>
+              <Form.Item name="month" rules={[{ required: true }]} noStyle>
+                <select className={selectClasses}>
+                  {monthOptions.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
               </Form.Item>
-            </Col>
-            <Col xs={24} sm={12} md={4}>
-              <Form.Item name="sale_amount" label="Sale Amount ($)">
-                <InputNumber 
-                  style={{ width: '100%' }} 
-                  formatter={value => `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                  parser={value => value.replace(/\$\s?|(,*)/g, '')}
-                  placeholder="25000"
-                />
-              </Form.Item>
-            </Col>
-            <Col xs={12} sm={6} md={3}>
-              <Form.Item name="year" label="Year">
-                <Select options={yearOptions} />
-              </Form.Item>
-            </Col>
-            <Col xs={12} sm={6} md={3}>
-              <Form.Item name="brand" label="Brand">
-                <Input placeholder="Honda" />
-              </Form.Item>
-            </Col>
-            <Col xs={12} sm={12} md={4}>
-              <Form.Item name="model" label="Model">
-                <Input placeholder="Civic" />
-              </Form.Item>
-            </Col>
-            <Col xs={12} sm={12} md={4}>
-              <Form.Item name="color" label="Color">
-                <Input placeholder="Red" />
-              </Form.Item>
-            </Col>
-          </Row>
+            </div>
 
-          <Row gutter={16}>
-            <Col xs={24} sm={8} md={3}>
-              <Form.Item name="date_of_buy" label="Buy Date">
-                <DatePicker style={{ width: '100%' }} />
+            {/* Type */}
+            <div className={fieldWrapperClasses}>
+              <label className={labelClasses}>Type</label>
+              <Form.Item name="type" rules={[{ required: true }]} noStyle>
+                <select className={selectClasses}>
+                  <option value="Buy">Buy</option>
+                  <option value="Sell">Sell</option>
+                </select>
               </Form.Item>
-            </Col>
-            <Col xs={24} sm={8} md={3}>
-              <Form.Item name="date_delivery" label="Deliv. Date">
-                <DatePicker style={{ width: '100%' }} />
+            </div>
+
+            {/* Condition */}
+            <div className={fieldWrapperClasses}>
+              <label className={labelClasses}>Condition</label>
+              <Form.Item name="car_type" rules={[{ required: true }]} noStyle>
+                <select className={selectClasses}>
+                  <option value="New">New</option>
+                  <option value="Used">Used</option>
+                </select>
               </Form.Item>
-            </Col>
-            <Col xs={24} sm={8} md={3}>
-              <Form.Item name="delivery_time" label="Deliv. Time">
-                <TimePicker format="HH:mm" style={{ width: '100%' }} />
+            </div>
+
+            {/* Stock# */}
+            <div className={fieldWrapperClasses}>
+              <label className={labelClasses}>Stock#</label>
+              <Form.Item name="stock_number" rules={[{ required: true }]} noStyle>
+                <input type="text" className={inputClasses} placeholder="H25XXX" />
               </Form.Item>
-            </Col>
-            <Col xs={24} sm={12} md={4}>
-              <Form.Item name="result" label="Status">
-                <Select placeholder="Select Status" options={[
-                  { value: 'N/A', label: 'N/A' },
-                  { value: 'Gas Full', label: 'Gas Full' },
-                  { value: 'Cleaned', label: 'Cleaned' },
-                  { value: 'Delivered', label: 'Delivered' },
-                ]} />
+            </div>
+
+            {/* Customer Name */}
+            <div className={fieldWrapperClasses}>
+              <label className={labelClasses}>Customer Name</label>
+              <Form.Item name="name" rules={[{ required: true }]} noStyle>
+                <input type="text" className={inputClasses} placeholder="e.g. Ming Lo Kim" />
               </Form.Item>
-            </Col>
-            <Col xs={24} sm={12} md={5}>
-              <Form.Item name="benefit" label="Benefit">
-                <Select placeholder="Select Benefit" options={[
-                  { value: 'N/A', label: 'N/A' },
-                  { value: 'All season mat', label: 'All season mat' },
-                  { value: 'Trunk tray', label: 'Trunk tray' },
-                  { value: 'Oil change service', label: 'Oil change service' },
-                ]} />
+            </div>
+
+            {/* Contact */}
+            <div className={fieldWrapperClasses}>
+              <label className={labelClasses}>Contact</label>
+              <Form.Item name="contact_number" noStyle>
+                <input type="text" className={inputClasses} placeholder="(604) 783-6903" onChange={handleContactChange} />
               </Form.Item>
-            </Col>
-            <Col xs={24} sm={12} md={3}>
-              <Form.Item name="benefit_qty" label="Benefit Qty">
-                <Select options={Array.from({ length: 11 }, (_, i) => ({ value: i, label: i.toString() }))} />
+            </div>
+
+            {/* Year */}
+            <div className={fieldWrapperClasses}>
+              <label className={labelClasses}>Year</label>
+              <Form.Item name="year" noStyle>
+                <select className={selectClasses}>
+                  {yearOptions.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
               </Form.Item>
-            </Col>
-            <Col xs={24} sm={24} md={3}>
-              <Form.Item name="part_incentive" label="Remarks">
-                <Input placeholder="Notes..." />
+            </div>
+
+            {/* Brand */}
+            <div className={fieldWrapperClasses}>
+              <label className={labelClasses}>Brand</label>
+              <Form.Item name="brand" noStyle>
+                <input type="text" className={inputClasses} placeholder="Honda" />
               </Form.Item>
-            </Col>
-          </Row>
+            </div>
+
+            {/* Model */}
+            <div className={fieldWrapperClasses}>
+              <label className={labelClasses}>Model</label>
+              <Form.Item name="model" noStyle>
+                <input type="text" className={inputClasses} placeholder="Civic" />
+              </Form.Item>
+            </div>
+
+            {/* Color */}
+            <div className={fieldWrapperClasses}>
+              <label className={labelClasses}>Color</label>
+              <Form.Item name="color" noStyle>
+                <input type="text" className={inputClasses} placeholder="Red" />
+              </Form.Item>
+            </div>
+
+            {/* Buy Date */}
+            <div className={fieldWrapperClasses}>
+              <label className={labelClasses}>Buy Date</label>
+              <Form.Item name="date_of_buy" noStyle>
+                <input type="date" className={inputClasses} />
+              </Form.Item>
+            </div>
+
+            {/* Deliv. Date */}
+            <div className={fieldWrapperClasses}>
+              <label className={labelClasses}>Deliv. Date</label>
+              <Form.Item name="date_delivery" noStyle>
+                <input type="date" className={inputClasses} />
+              </Form.Item>
+            </div>
+
+            {/* Deliv. Time */}
+            <div className={fieldWrapperClasses}>
+              <label className={labelClasses}>Deliv. Time</label>
+              <Form.Item name="delivery_time" noStyle>
+                <input type="time" className={inputClasses} />
+              </Form.Item>
+            </div>
+
+            {/* Status */}
+            <div className={fieldWrapperClasses}>
+              <label className={labelClasses}>Status</label>
+              <Form.Item name="result" noStyle>
+                <select className={selectClasses}>
+                  <option value="N/A">N/A</option>
+                  <option value="Gas Full">Gas Full</option>
+                  <option value="Cleaned">Cleaned</option>
+                  <option value="Delivered">Delivered</option>
+                </select>
+              </Form.Item>
+            </div>
+
+            {/* Benefit */}
+            <div className={fieldWrapperClasses}>
+              <label className={labelClasses}>Benefit</label>
+              <Form.Item name="benefit" noStyle>
+                <select className={selectClasses}>
+                  <option value="N/A">N/A</option>
+                  <option value="All season mat">All season mat</option>
+                  <option value="Trunk tray">Trunk tray</option>
+                  <option value="Oil change service">Oil change service</option>
+                </select>
+              </Form.Item>
+            </div>
+
+            {/* Benefit Qty */}
+            <div className={fieldWrapperClasses}>
+              <label className={labelClasses}>Benefit Qty</label>
+              <Form.Item name="benefit_qty" noStyle>
+                <select className={selectClasses}>
+                  {Array.from({ length: 11 }, (_, i) => (
+                    <option key={i} value={i}>{i}</option>
+                  ))}
+                </select>
+              </Form.Item>
+            </div>
+
+            {/* Remarks */}
+            <div className={fieldWrapperClasses}>
+              <label className={labelClasses}>Remarks</label>
+              <Form.Item name="part_incentive" noStyle>
+                <input type="text" className={inputClasses} placeholder="Notes..." />
+              </Form.Item>
+            </div>
+          </div>
 
           <Form.Item style={{ marginBottom: 0 }}>
             <Space style={{ width: '100%', justifyContent: 'center' }}>
