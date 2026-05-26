@@ -159,7 +159,7 @@ const Home = ({ isDarkMode }) => {
   });
 
   // --- Real-time Stats Calculation ---
-  const totalCars = filteredData.length;
+  const totalCars = filteredData.filter(item => item.result === 'Delivered').length;
 
   // --- Export Excel Logic ---
   const handleExportExcel = () => {
@@ -295,7 +295,16 @@ const Home = ({ isDarkMode }) => {
       }
     },
     { title: 'Condition', dataIndex: 'car_type', key: 'car_type' },
-    { title: 'Stock#', dataIndex: 'stock_number', key: 'stock_number' },
+    { 
+      title: 'Stock#', 
+      dataIndex: 'stock_number', 
+      key: 'stock_number',
+      render: (text, record) => (
+        <span style={record.result === 'Canceled' ? { textDecoration: 'line-through', color: 'red' } : {}}>
+          {text}
+        </span>
+      )
+    },
     { title: 'Customer Name', dataIndex: 'name', key: 'name' },
     { title: 'Contact', dataIndex: 'contact_number', key: 'contact_number' },
     { title: 'Year', dataIndex: 'year', key: 'year' },
@@ -536,6 +545,7 @@ const Home = ({ isDarkMode }) => {
                   <option value="Gas Full">Gas Full</option>
                   <option value="Cleaned">Cleaned</option>
                   <option value="Delivered">Delivered</option>
+                  <option value="Canceled">Canceled</option>
                 </select>
               </Form.Item>
             </div>
