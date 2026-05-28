@@ -163,9 +163,8 @@ export default function FollowingSandbox({ isDarkMode }) {
   };
 
   return (
-    <div className={`min-h-screen ${themeClasses.bg} p-6 font-sans text-left transition-colors duration-300`}>
-      <div className="max-w-[1600px] mx-auto">
-        {/* Header - Styled to match Home page Sales Entry */}
+    <div className={`w-full min-h-screen ${themeClasses.bg} px-4 py-6 font-sans text-left transition-colors duration-300`}>
+      {/* Header - Styled to match Home page Sales Entry */}
         <div style={{ 
           display: 'flex', 
           justifyContent: 'space-between', 
@@ -290,7 +289,7 @@ export default function FollowingSandbox({ isDarkMode }) {
           <div className={`px-6 py-4 border-b ${isDarkMode ? 'border-[#333]' : 'border-gray-100'} flex justify-between items-center`}>
             <h2 className={`text-lg font-bold ${themeClasses.text}`}>Recent Records</h2>
           </div>
-          <div className="overflow-x-auto">
+          <div className="w-full overflow-x-auto">
             <table className="w-full text-sm text-left border-collapse">
               <thead className={`${themeClasses.tableHeader} border-b font-semibold uppercase tracking-wider text-[11px]`}>
                 <tr>
@@ -405,7 +404,6 @@ export default function FollowingSandbox({ isDarkMode }) {
             </table>
           </div>
         </div>
-      </div>
     </div>
   );
 }
