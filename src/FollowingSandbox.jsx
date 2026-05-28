@@ -38,6 +38,7 @@ export default function FollowingSandbox({ isDarkMode }) {
     budget_amount: '',
     currently_vehicle: '',
     lien: 'Cash',
+    status: 'In progress',
     buy_vehicle_date: '',
     lead_following: dayjs().add(3, 'day').format('YYYY-MM-DD'),
     memo: ''
@@ -134,6 +135,7 @@ export default function FollowingSandbox({ isDarkMode }) {
       budget_amount: item.budget_amount || '',
       currently_vehicle: item.currently_vehicle || '',
       lien: item.lien || 'Cash',
+      status: item.status || 'In progress',
       buy_vehicle_date: item.buy_vehicle_date || '',
       lead_following: item.lead_following || '',
       memo: item.memo || ''
@@ -226,13 +228,22 @@ export default function FollowingSandbox({ isDarkMode }) {
                 <input name="currently_vehicle" value={formData.currently_vehicle} onChange={handleInputChange} className={`w-full px-3 py-2 ${themeClasses.input} border rounded outline-none transition-all text-sm`} />
               </div>
 
-              {/* Row 3 - Dates, Memo and Actions */}
-              <div className="lg:col-span-1">
+              {/* Row 3 */}
+              <div>
                 <label className={`block text-xs font-semibold ${themeClasses.label} mb-1 uppercase tracking-wider`}>Lien</label>
                 <select name="lien" value={formData.lien} onChange={handleInputChange} className={`w-full px-3 py-2 ${themeClasses.input} border rounded outline-none text-sm`}>
                   <option className={isDarkMode ? 'bg-[#1f1f1f]' : ''}>Cash</option>
                   <option className={isDarkMode ? 'bg-[#1f1f1f]' : ''}>Lease</option>
                   <option className={isDarkMode ? 'bg-[#1f1f1f]' : ''}>Finance</option>
+                </select>
+              </div>
+              <div>
+                <label className={`block text-xs font-semibold ${isDarkMode ? 'text-[#177ddc]' : 'text-blue-600'} mb-1 uppercase tracking-wider`}>Status</label>
+                <select name="status" value={formData.status} onChange={handleInputChange} className={`w-full px-3 py-2 ${themeClasses.input} border rounded outline-none text-sm font-bold`}>
+                  <option className={isDarkMode ? 'bg-[#1f1f1f]' : ''}>In progress</option>
+                  <option className={isDarkMode ? 'bg-[#1f1f1f]' : ''}>Appointment</option>
+                  <option className={isDarkMode ? 'bg-[#1f1f1f]' : ''}>Sold</option>
+                  <option className={isDarkMode ? 'bg-[#1f1f1f]' : ''}>Lost</option>
                 </select>
               </div>
               <div>
@@ -244,7 +255,8 @@ export default function FollowingSandbox({ isDarkMode }) {
                 <input type="date" name="lead_following" value={formData.lead_following} onChange={handleInputChange} className={`w-full px-3 py-2 ${isDarkMode ? 'bg-[#111b26] border-[#153450] text-[#fff]' : 'bg-blue-50/50 border-blue-200 text-gray-900'} border rounded outline-none transition-all text-sm`} />
               </div>
 
-              <div className="lg:col-span-1">
+              {/* Row 4 */}
+              <div className="lg:col-span-3">
                 <label className={`block text-xs font-semibold ${themeClasses.label} mb-1 uppercase tracking-wider`}>Memo</label>
                 <textarea 
                   name="memo" 
@@ -256,27 +268,27 @@ export default function FollowingSandbox({ isDarkMode }) {
                 />
               </div>
 
-              <div className="lg:col-span-4 flex items-end justify-end gap-2 mt-2">
+              <div className="lg:col-span-1 flex items-end justify-end gap-2">
                 {isEditing ? (
                   <>
                     <button 
                       type="button" 
                       onClick={handleCancel}
-                      className={`px-8 py-2 rounded text-sm font-semibold transition-colors ${isDarkMode ? 'bg-gray-800 text-gray-300 hover:bg-gray-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                      className={`px-6 py-2 rounded text-sm font-semibold transition-colors ${isDarkMode ? 'bg-gray-800 text-gray-300 hover:bg-gray-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
                     >
                       Cancel
                     </button>
                     <button 
                       type="submit" 
                       disabled={loading}
-                      className={`px-8 py-2 rounded text-sm font-semibold transition-colors text-white ${isDarkMode ? 'bg-green-600 hover:bg-green-500' : 'bg-green-500 hover:bg-green-600'} disabled:opacity-50`}
+                      className={`px-6 py-2 rounded text-sm font-semibold transition-colors text-white ${isDarkMode ? 'bg-green-600 hover:bg-green-500' : 'bg-green-500 hover:bg-green-600'} disabled:opacity-50`}
                     >
                       {loading ? '...' : 'Save'}
                     </button>
                   </>
                 ) : (
-                  <button type="submit" disabled={loading} className={`px-10 py-2.5 ${isDarkMode ? 'bg-[#177ddc] hover:bg-[#3c9ae8]' : 'bg-[#1677ff] hover:bg-[#4096ff]'} text-white rounded text-sm font-semibold transition-colors shadow-sm disabled:opacity-50`}>
-                    {loading ? 'Submitting...' : 'Submit Record'}
+                  <button type="submit" disabled={loading} className={`w-full py-2 ${isDarkMode ? 'bg-[#177ddc] hover:bg-[#3c9ae8]' : 'bg-[#1677ff] hover:bg-[#4096ff]'} text-white rounded text-sm font-semibold transition-colors shadow-sm disabled:opacity-50`}>
+                    {loading ? '...' : 'Submit'}
                   </button>
                 )}
               </div>
@@ -294,7 +306,8 @@ export default function FollowingSandbox({ isDarkMode }) {
               <thead className={`${themeClasses.tableHeader} border-b font-semibold uppercase tracking-wider text-[11px]`}>
                 <tr>
                   <th className={`px-4 py-3 border-r ${themeClasses.tableCell} w-[80px]`}>Action</th>
-                  <th className={`px-4 py-3 border-r ${themeClasses.tableCell} w-[180px]`}>Created</th>
+                  <th className={`px-4 py-3 border-r ${themeClasses.tableCell} w-[150px]`}>Created</th>
+                  <th className={`px-4 py-3 border-r ${themeClasses.tableCell} w-[120px]`}>Status</th>
                   <th className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>Name</th>
                   <th className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>Contact</th>
                   <th className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>Desired Vehicle</th>
@@ -307,11 +320,16 @@ export default function FollowingSandbox({ isDarkMode }) {
               </thead>
               <tbody className={`divide-y ${isDarkMode ? 'divide-[#333]' : 'divide-gray-100'}`}>
                 {tableLoading ? (
-                  <tr><td colSpan="10" className={`text-center py-10 ${themeClasses.secondaryText}`}>Loading leads...</td></tr>
+                  <tr><td colSpan="11" className={`text-center py-10 ${themeClasses.secondaryText}`}>Loading leads...</td></tr>
                 ) : dataList.length === 0 ? (
-                  <tr><td colSpan="10" className={`text-center py-10 ${themeClasses.secondaryText}`}>No records found.</td></tr>
+                  <tr><td colSpan="11" className={`text-center py-10 ${themeClasses.secondaryText}`}>No records found.</td></tr>
                 ) : (
                   dataList.map((item) => {
+                    // --- Status Logic ---
+                    const isLost = item.status === 'Lost';
+                    const isSold = item.status === 'Sold';
+                    const isAppt = item.status === 'Appointment';
+                    
                     // --- Precise Local Date Logic ---
                     const todayObj = new Date();
                     const yyyy = todayObj.getFullYear();
@@ -323,18 +341,21 @@ export default function FollowingSandbox({ isDarkMode }) {
                     const cleanLeadFollowing = item.lead_following ? item.lead_following.split(' ')[0].split('T')[0] : '';
                     
                     // --- Highlight Condition: localTodayStr >= cleanLeadFollowing ---
-                    const isDue = cleanLeadFollowing && localTodayStr >= cleanLeadFollowing;
+                    const isDue = cleanLeadFollowing && localTodayStr >= cleanLeadFollowing && !isLost && !isSold;
                     
                     const rowHighlightClass = isDue 
                       ? (isDarkMode ? 'bg-red-950/30 border-l-4 border-l-red-500' : 'bg-red-50/60 hover:bg-red-50 border-l-4 border-l-red-500') 
                       : '';
                     
+                    // --- Lost Style ---
+                    const lostTextClass = isLost ? 'line-through decoration-red-500 decoration-2 text-slate-400 opacity-60' : '';
+                    
                     const textHighlightClass = isDue 
                       ? (isDarkMode ? 'text-red-400 font-semibold' : 'text-red-700 font-semibold') 
-                      : themeClasses.text;
+                      : (isLost ? 'text-slate-400' : themeClasses.text);
 
                     return (
-                      <tr key={item.id} className={`${themeClasses.tableRow} ${rowHighlightClass} transition-colors`}>
+                      <tr key={item.id} className={`${themeClasses.tableRow} ${rowHighlightClass} ${isLost ? 'bg-gray-500/5' : ''} transition-colors`}>
                         <td className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>
                           <div className="flex items-center gap-3">
                             <button 
@@ -353,47 +374,57 @@ export default function FollowingSandbox({ isDarkMode }) {
                             </button>
                           </div>
                         </td>
-                        <td className={`px-4 py-3 border-r ${themeClasses.tableCell} text-xs ${isDue ? (isDarkMode ? 'text-red-300/70' : 'text-red-800/70') : themeClasses.text}`}>
-                          {item.created_at ? dayjs(item.created_at).format('MMM DD, YYYY, HH:mm') : '-'}
+                        <td className={`px-4 py-3 border-r ${themeClasses.tableCell} text-xs ${isDue ? (isDarkMode ? 'text-red-300/70' : 'text-red-800/70') : (isLost ? 'text-slate-500' : themeClasses.text)}`}>
+                          <div className={lostTextClass}>{item.created_at ? dayjs(item.created_at).format('MMM DD, HH:mm') : '-'}</div>
                         </td>
                         <td className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>
-                          <div className={`font-bold ${textHighlightClass}`}>{item.first_name} {item.last_name}</div>
+                          <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${
+                            isLost ? 'bg-gray-200 text-gray-500' :
+                            isSold ? 'bg-green-500 text-white' :
+                            isAppt ? 'bg-purple-500 text-white' :
+                            (isDarkMode ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-50 text-blue-600')
+                          }`}>
+                            {item.status || 'In progress'}
+                          </span>
                         </td>
                         <td className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>
-                          <div className={isDue ? (isDarkMode ? 'text-red-200' : 'text-red-800') : (isDarkMode ? 'text-[#fff]' : 'text-gray-700')}>{item.phone_number}</div>
-                          <div className={`${isDue ? (isDarkMode ? 'text-red-400/60' : 'text-red-600/60') : themeClasses.secondaryText} text-xs`}>{item.email}</div>
+                          <div className={`font-bold ${textHighlightClass} ${lostTextClass}`}>{item.first_name} {item.last_name}</div>
                         </td>
                         <td className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>
-                          <div className="flex items-center gap-2">
+                          <div className={`${isDue ? (isDarkMode ? 'text-red-200' : 'text-red-800') : (isLost ? 'text-slate-500' : (isDarkMode ? 'text-[#fff]' : 'text-gray-700'))} ${lostTextClass}`}>{item.phone_number}</div>
+                          <div className={`${isDue ? (isDarkMode ? 'text-red-400/60' : 'text-red-600/60') : (isLost ? 'text-slate-500/50' : themeClasses.secondaryText)} text-xs ${lostTextClass}`}>{item.email}</div>
+                        </td>
+                        <td className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>
+                          <div className={`flex items-center gap-2 ${lostTextClass}`}>
                             <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${
                               item.condition === 'New' 
                                 ? (isDarkMode ? 'bg-[#111b26] text-[#177ddc]' : 'bg-blue-100 text-blue-700') 
                                 : (isDarkMode ? 'bg-[#162312] text-[#49aa19]' : 'bg-green-100 text-green-700')
-                            } ${isDue ? 'ring-1 ring-red-400/50' : ''}`}>
+                            } ${isDue ? 'ring-1 ring-red-400/50' : ''} ${isLost ? 'grayscale opacity-50' : ''}`}>
                               {item.condition}
                             </span>
-                            <span className={`${isDue ? textHighlightClass : themeClasses.text} font-medium`}>{item.vehicle_brand}</span>
+                            <span className={`${isDue ? textHighlightClass : (isLost ? 'text-slate-500' : themeClasses.text)} font-medium`}>{item.vehicle_brand}</span>
                           </div>
                         </td>
                         <td className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>
-                          <div className={`font-semibold ${isDue ? textHighlightClass : themeClasses.text}`}>
+                          <div className={`font-semibold ${isDue ? textHighlightClass : (isLost ? 'text-slate-500' : themeClasses.text)} ${lostTextClass}`}>
                             {isNaN(item.budget_amount) ? item.budget_amount : `$${Number(item.budget_amount || 0).toLocaleString()}`}
                           </div>
-                          <div className={`${isDue ? (isDarkMode ? 'text-red-400' : 'text-red-600') : (isDarkMode ? 'text-[#177ddc]' : 'text-blue-600')} text-[10px] font-bold uppercase`}>{item.lien}</div>
+                          <div className={`${isDue ? (isDarkMode ? 'text-red-400' : 'text-red-600') : (isLost ? 'text-slate-500' : (isDarkMode ? 'text-[#177ddc]' : 'text-blue-600'))} text-[10px] font-bold uppercase ${lostTextClass}`}>{item.lien}</div>
                         </td>
-                        <td className={`px-4 py-3 border-r ${themeClasses.tableCell} ${isDue ? (isDarkMode ? 'text-red-300' : 'text-red-700') : (isDarkMode ? 'text-[#aaa]' : 'text-gray-600')}`}>
+                        <td className={`px-4 py-3 border-r ${themeClasses.tableCell} ${isDue ? (isDarkMode ? 'text-red-300' : 'text-red-700') : (isLost ? 'text-slate-500' : (isDarkMode ? 'text-[#aaa]' : 'text-gray-600'))} ${lostTextClass}`}>
                           {item.currently_vehicle || '-'}
                         </td>
-                        <td className={`px-4 py-3 border-r ${themeClasses.tableCell} ${isDue ? (isDarkMode ? 'text-red-400/60' : 'text-red-600/60') : themeClasses.secondaryText}`}>
+                        <td className={`px-4 py-3 border-r ${themeClasses.tableCell} ${isDue ? (isDarkMode ? 'text-red-400/60' : 'text-red-600/60') : (isLost ? 'text-slate-500/50' : themeClasses.secondaryText)} ${lostTextClass}`}>
                           {item.buy_vehicle_date ? dayjs(item.buy_vehicle_date).format('MM/DD/YYYY') : '-'}
                         </td>
                         <td className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>
-                          <div className={`font-bold ${isDue ? (isDarkMode ? 'text-red-400' : 'text-red-600') : (isDarkMode ? 'text-[#177ddc]' : 'text-blue-600')}`}>
+                          <div className={`font-bold ${isDue ? (isDarkMode ? 'text-red-400' : 'text-red-600') : (isLost ? 'text-slate-500' : (isDarkMode ? 'text-[#177ddc]' : 'text-blue-600'))} ${lostTextClass}`}>
                             {dayjs(item.lead_following).format('MM/DD/YYYY')}
                           </div>
                           {isDue && <div className="text-[9px] uppercase font-black text-red-500 mt-0.5 animate-pulse">Action Required</div>}
                         </td>
-                        <td className={`px-4 py-3 ${isDue ? (isDarkMode ? 'text-red-300/70' : 'text-red-700/70') : themeClasses.secondaryText} text-xs italic`}>
+                        <td className={`px-4 py-3 ${isDue ? (isDarkMode ? 'text-red-300/70' : 'text-red-700/70') : (isLost ? 'text-slate-500/50' : themeClasses.secondaryText)} text-xs italic ${lostTextClass}`}>
                           {item.memo || '-'}
                         </td>
                       </tr>
