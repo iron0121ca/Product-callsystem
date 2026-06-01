@@ -151,17 +151,30 @@ const Home = ({ isDarkMode }) => {
 
   // --- Dynamic Filtering Logic (Based on Delivery Date) ---
   const filteredData = dataList.filter(item => {
+    // Rule: Always show records with no delivery date (Pending deals)
+    if (!item.date_delivery) return true;
+    
+    // If "All" is selected for both, show everything
     if (selectedYear === 'all' && selectedMonth === 'all') return true;
-    if (!item.date_delivery) return false;
+    
+    // Otherwise, check if delivery date matches filters
+    const deliveryDate = dayjs(item.date_delivery);
+    const yearMatch = selectedYear === 'all' || deliveryDate.year().toString() === selectedYear;
+    const monthMatch = selectedMonth === 'all' || (deliveryDate.month() + 1).toString() === selectedMonth;
+    
+    return yearMatch && monthMatch;
+  });
+
+  // --- Real-time Stats Calculation (Strict Rule) ---
+  const totalCars = filteredData.filter(item => {
+    if (!item.date_delivery || item.result !== 'Delivered') return false;
     
     const deliveryDate = dayjs(item.date_delivery);
     const yearMatch = selectedYear === 'all' || deliveryDate.year().toString() === selectedYear;
     const monthMatch = selectedMonth === 'all' || (deliveryDate.month() + 1).toString() === selectedMonth;
+    
     return yearMatch && monthMatch;
-  });
-
-  // --- Real-time Stats Calculation ---
-  const totalCars = filteredData.filter(item => item.result === 'Delivered').length;
+  }).length;
 
   // --- Export Excel Logic ---
   const handleExportExcel = () => {
