@@ -10,8 +10,7 @@ import {
   PrinterOutlined, EditOutlined, PlusOutlined, 
   SaveOutlined, CloseOutlined, DeleteOutlined,
   DownloadOutlined, SunOutlined, MoonOutlined,
-  HomeOutlined, UsergroupAddOutlined, UserAddOutlined,
-  BarChartOutlined
+  HomeOutlined, UserAddOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import * as XLSX from 'xlsx';
@@ -36,8 +35,6 @@ const Home = ({ isDarkMode }) => {
   // --- Filter State ---
   const [selectedYear, setSelectedYear] = useState(dayjs().year().toString());
   const [selectedMonth, setSelectedMonth] = useState((dayjs().month() + 1).toString());
-
-  const { defaultAlgorithm, darkAlgorithm } = theme;
 
   // --- UI Constants for Refactoring ---
   const inputClasses = `h-9 px-3 border border-slate-200 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all`;
@@ -93,8 +90,9 @@ const Home = ({ isDarkMode }) => {
       year: dayjs().year().toString(),
       result: 'N/A',
       benefit: 'N/A',
-      benefit_qty: 1,
+      benefit_qty: 0,
       type: 'Buy',
+      car_type: 'New',
       date_of_buy: null,
       date_delivery: null,
       delivery_time: null
@@ -151,10 +149,14 @@ const Home = ({ isDarkMode }) => {
     fetchData();
   }, []);
 
-  // --- Dynamic Filtering Logic ---
+  // --- Dynamic Filtering Logic (Based on Delivery Date) ---
   const filteredData = dataList.filter(item => {
-    const yearMatch = selectedYear === 'all' || item.annual_year?.toString() === selectedYear;
-    const monthMatch = selectedMonth === 'all' || item.month?.toString() === selectedMonth;
+    if (selectedYear === 'all' && selectedMonth === 'all') return true;
+    if (!item.date_delivery) return false;
+    
+    const deliveryDate = dayjs(item.date_delivery);
+    const yearMatch = selectedYear === 'all' || deliveryDate.year().toString() === selectedYear;
+    const monthMatch = selectedMonth === 'all' || (deliveryDate.month() + 1).toString() === selectedMonth;
     return yearMatch && monthMatch;
   });
 
@@ -216,6 +218,7 @@ const Home = ({ isDarkMode }) => {
         car_type: values.car_type,
         stock_number: values.stock_number,
         name: values.name,
+        business_name: values.business_name || '', // Ensure business_name is included
         contact_number: values.contact_number,
         year: parseInt(values.year),
         brand: values.brand,
@@ -226,7 +229,7 @@ const Home = ({ isDarkMode }) => {
         delivery_time: values.delivery_time ? (dayjs.isDayjs(values.delivery_time) ? values.delivery_time.format('HH:mm:ss') : values.delivery_time) : null,
         result: values.result,
         benefit: values.benefit,
-        benefit_qty: values.benefit_qty,
+        benefit_qty: parseInt(values.benefit_qty || 0),
         part_incentive: values.part_incentive,
       };
 
@@ -398,10 +401,12 @@ const Home = ({ isDarkMode }) => {
           initialValues={{ 
             annual_year: dayjs().year().toString(), 
             month: (dayjs().month() + 1).toString(),
+            type: 'Buy',
             car_type: 'New',
             year: dayjs().year().toString(),
             result: 'N/A',
             benefit: 'N/A',
+            benefit_qty: 0,
           }}
           size="small"
         >
