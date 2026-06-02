@@ -87,17 +87,20 @@ const Following = () => {
       .from('potential_customers')
       .insert([formData]);
     
-    if (!error) {
-      setIsModalOpen(false);
-      fetchCustomers();
-      // Reset form
-      setFormData({
-        customer_name: '', contact_number: '', email: '', condition: 'Any',
-        desired_vehicle: '', budget_type: 'Monthly', budget_amount: '',
-        expected_buying_time: 'Within 1 Month', current_car: '',
-        next_followup_date: dayjs().add(3, 'day').format('YYYY-MM-DD'), remarks: ''
-      });
+    if (error) {
+      alert('Operation failed: ' + error.message);
+      return;
     }
+
+    setIsModalOpen(false);
+    fetchCustomers();
+    // Reset form
+    setFormData({
+      customer_name: '', contact_number: '', email: '', condition: 'Any',
+      desired_vehicle: '', budget_type: 'Monthly', budget_amount: '',
+      expected_buying_time: 'Within 1 Month', current_car: '',
+      next_followup_date: dayjs().add(3, 'day').format('YYYY-MM-DD'), remarks: ''
+    });
   };
 
   return (

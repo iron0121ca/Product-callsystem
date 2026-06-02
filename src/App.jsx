@@ -231,7 +231,6 @@ const Home = ({ isDarkMode }) => {
         car_type: values.car_type,
         stock_number: values.stock_number,
         name: values.name,
-        business_name: values.business_name || '', // Ensure business_name is included
         contact_number: values.contact_number,
         year: parseInt(values.year),
         brand: values.brand,
