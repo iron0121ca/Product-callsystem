@@ -424,7 +424,7 @@ export default function FollowingSandbox({ isDarkMode }) {
                           </div>
                           {isDue && <div className="text-[9px] uppercase font-black text-red-500 mt-0.5 animate-pulse">Action Required</div>}
                         </td>
-                        <td className={`px-4 py-3 ${isDue ? (isDarkMode ? 'text-red-300/70' : 'text-red-700/70') : (isLost ? 'text-slate-500/50' : themeClasses.secondaryText)} text-xs italic ${lostTextClass}`}>
+                        <td className={`px-4 py-3 text-xs italic ${lostTextClass} ${isDue ? (isDarkMode ? 'text-red-300/70' : 'text-red-700/70') : 'text-black dark:text-white'}`}>
                           {item.memo || '-'}
                         </td>
                       </tr>
