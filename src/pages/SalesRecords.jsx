@@ -359,7 +359,7 @@ const SalesRecords = ({ isDarkMode }) => {
             fontWeight: 'bold',
             fontFamily: "'Roboto', sans-serif" 
           }}>
-            {isEditing ? "Edit Sale Record" : "Sales Entry"}
+            {isEditing ? "Edit Sale Record" : "Sales Records"}
           </h2>
 
           {/* Dynamic Stats Badge - Positioned at far right */}
