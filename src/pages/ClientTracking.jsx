@@ -1,24 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { createClient } from '@supabase/supabase-js';
 import dayjs from 'dayjs';
 import { Trash2, Pencil } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { formatPhoneNumber } from '../utils/formatters';
 
-// --- Supabase Config ---
-const supabase = createClient('https://ishyhtympjphqkaieeud.supabase.co', 'sb_publishable_vtxImjk27hsDa-o10lF-oA_uwe4K7o5');
-
-// --- Helper: Phone Formatting ---
-const formatPhoneNumber = (value) => {
-  if (!value) return value;
-  const phoneNumber = value.replace(/[^\d]/g, '');
-  const phoneNumberLength = phoneNumber.length;
-  if (phoneNumberLength < 4) return phoneNumber;
-  if (phoneNumberLength < 7) {
-    return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3)}`;
-  }
-  return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
-};
-
-export default function FollowingSandbox({ isDarkMode }) {
+export default function ClientTracking({ isDarkMode }) {
   const [loading, setLoading] = useState(false);
   const [dataList, setDataList] = useState([]);
   const [tableLoading, setTableLoading] = useState(false);
