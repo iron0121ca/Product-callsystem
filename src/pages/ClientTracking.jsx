@@ -337,7 +337,7 @@ export default function ClientTracking({ isDarkMode }) {
                     const lostTextClass = isLost ? 'line-through decoration-red-500 decoration-2' : '';
                     
                     const textHighlightClass = isDue 
-                      ? (isDarkMode ? 'text-red-400 font-semibold' : 'text-red-700 font-semibold') 
+                      ? (isDarkMode ? 'text-red-400 font-semibold' : 'text-red-600 font-bold') 
                       : (isLost ? (isDarkMode ? 'text-slate-400' : 'text-black') : themeClasses.text);
 
                     return (
@@ -360,7 +360,7 @@ export default function ClientTracking({ isDarkMode }) {
                             </button>
                           </div>
                         </td>
-                        <td className={`px-4 py-3 border-r ${themeClasses.tableCell} text-xs ${isDue ? (isDarkMode ? 'text-red-300/70' : 'text-red-800/70') : (isLost ? (isDarkMode ? 'text-slate-500' : 'text-black') : themeClasses.text)}`}>
+                        <td className={`px-4 py-3 border-r ${themeClasses.tableCell} text-xs ${isDue ? (isDarkMode ? 'text-red-300' : 'text-red-600') : (isLost ? (isDarkMode ? 'text-slate-500' : 'text-black') : (isDarkMode ? themeClasses.text : 'text-black'))}`}>
                           <div className={lostTextClass}>{item.created_at ? dayjs(item.created_at).format('MMM DD, HH:mm') : '-'}</div>
                         </td>
                         <td className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>
@@ -377,8 +377,8 @@ export default function ClientTracking({ isDarkMode }) {
                           <div className={`font-bold ${textHighlightClass} ${lostTextClass}`}>{item.first_name} {item.last_name}</div>
                         </td>
                         <td className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>
-                          <div className={`${isDue ? (isDarkMode ? 'text-red-200' : 'text-red-800') : (isLost ? (isDarkMode ? 'text-slate-500' : 'text-black') : (isDarkMode ? 'text-[#fff]' : 'text-black'))} ${lostTextClass}`}>{item.phone_number}</div>
-                          <div className={`${isDue ? (isDarkMode ? 'text-red-400/60' : 'text-red-600/60') : (isLost ? (isDarkMode ? 'text-slate-500/50' : 'text-gray-900') : themeClasses.secondaryText)} text-xs ${lostTextClass}`}>{item.email}</div>
+                          <div className={`${isDue ? (isDarkMode ? 'text-red-200' : 'text-red-600') : (isLost ? (isDarkMode ? 'text-slate-500' : 'text-black') : (isDarkMode ? 'text-[#fff]' : 'text-black'))} ${lostTextClass}`}>{item.phone_number}</div>
+                          <div className={`${isDue ? (isDarkMode ? 'text-red-400' : 'text-red-600') : (isLost ? (isDarkMode ? 'text-slate-500/50' : 'text-black') : (isDarkMode ? themeClasses.secondaryText : 'text-black'))} text-xs ${lostTextClass}`}>{item.email}</div>
                         </td>
                         <td className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>
                           <div className={`flex items-center gap-2 ${lostTextClass}`}>
@@ -389,19 +389,19 @@ export default function ClientTracking({ isDarkMode }) {
                             } ${isDue ? 'ring-1 ring-red-400/50' : ''} ${isLost ? 'grayscale opacity-50' : ''}`}>
                               {item.condition}
                             </span>
-                            <span className={`${isDue ? textHighlightClass : (isLost ? (isDarkMode ? 'text-slate-500' : 'text-black') : themeClasses.text)} font-medium`}>{item.vehicle_brand}</span>
+                            <span className={`${isDue ? textHighlightClass : (isLost ? (isDarkMode ? 'text-slate-500' : 'text-black') : (isDarkMode ? themeClasses.text : 'text-black'))} font-medium`}>{item.vehicle_brand}</span>
                           </div>
                         </td>
                         <td className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>
-                          <div className={`font-semibold ${isDue ? textHighlightClass : (isLost ? (isDarkMode ? 'text-slate-500' : 'text-black') : themeClasses.text)} ${lostTextClass}`}>
+                          <div className={`font-semibold ${isDue ? textHighlightClass : (isLost ? (isDarkMode ? 'text-slate-500' : 'text-black') : (isDarkMode ? themeClasses.text : 'text-black'))} ${lostTextClass}`}>
                             {isNaN(item.budget_amount) ? item.budget_amount : `$${Number(item.budget_amount || 0).toLocaleString()}`}
                           </div>
                           <div className={`${isDue ? (isDarkMode ? 'text-red-400' : 'text-red-600') : (isLost ? (isDarkMode ? 'text-slate-500' : 'text-black') : (isDarkMode ? 'text-[#177ddc]' : 'text-blue-600'))} text-[10px] font-bold uppercase ${lostTextClass}`}>{item.lien}</div>
                         </td>
-                        <td className={`px-4 py-3 border-r ${themeClasses.tableCell} ${isDue ? (isDarkMode ? 'text-red-300' : 'text-red-700') : (isLost ? (isDarkMode ? 'text-slate-500' : 'text-black') : (isDarkMode ? 'text-[#aaa]' : 'text-black'))} ${lostTextClass}`}>
+                        <td className={`px-4 py-3 border-r ${themeClasses.tableCell} ${isDue ? (isDarkMode ? 'text-red-300' : 'text-red-600') : (isLost ? (isDarkMode ? 'text-slate-500' : 'text-black') : (isDarkMode ? 'text-[#aaa]' : 'text-black'))} ${lostTextClass}`}>
                           {item.currently_vehicle || '-'}
                         </td>
-                        <td className={`px-4 py-3 border-r ${themeClasses.tableCell} ${isDue ? (isDarkMode ? 'text-red-400/60' : 'text-red-600/60') : (isLost ? (isDarkMode ? 'text-slate-500/50' : 'text-gray-900') : themeClasses.secondaryText)} ${lostTextClass}`}>
+                        <td className={`px-4 py-3 border-r ${themeClasses.tableCell} ${isDue ? (isDarkMode ? 'text-red-400' : 'text-red-600') : (isLost ? (isDarkMode ? 'text-slate-500/50' : 'text-black') : (isDarkMode ? themeClasses.secondaryText : 'text-black'))} ${lostTextClass}`}>
                           {item.buy_vehicle_date ? dayjs(item.buy_vehicle_date).format('MM/DD/YYYY') : '-'}
                         </td>
                         <td className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>
@@ -410,7 +410,7 @@ export default function ClientTracking({ isDarkMode }) {
                           </div>
                           {isDue && <div className="text-[9px] uppercase font-black text-red-500 mt-0.5 animate-pulse">Action Required</div>}
                         </td>
-                        <td className={`px-4 py-3 text-xs italic ${lostTextClass} ${isDue ? (isDarkMode ? 'text-red-300/70' : 'text-red-700/70') : 'text-black dark:text-white'}`}>
+                        <td className={`px-4 py-3 text-xs italic ${lostTextClass} ${isDue ? (isDarkMode ? 'text-red-300' : 'text-red-600') : 'text-black dark:text-white'}`}>
                           {item.memo || '-'}
                         </td>
                       </tr>
