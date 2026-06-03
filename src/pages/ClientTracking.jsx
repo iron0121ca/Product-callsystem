@@ -143,7 +143,7 @@ export default function ClientTracking({ isDarkMode }) {
     card: isDarkMode ? 'bg-[#141414] border-[#333]' : 'bg-white border-gray-200',
     text: isDarkMode ? 'text-[#fff]' : 'text-gray-900',
     label: isDarkMode ? 'text-[#aaa]' : 'text-gray-600',
-    input: isDarkMode ? 'bg-[#1f1f1f] border-[#434343] text-[#fff] focus:ring-[#1677ff]' : 'bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500',
+    input: isDarkMode ? 'bg-[#1f1f1f] border-[#434343] text-[#fff] focus:ring-[#1677ff]' : 'bg-white border-gray-300 text-black focus:ring-blue-500',
     tableHeader: isDarkMode ? 'bg-[#1f1f1f] border-[#333] text-[#aaa]' : 'bg-[#fafafa] border-gray-200 text-gray-600',
     tableRow: isDarkMode ? 'hover:bg-[#1f1f1f] border-[#333]' : 'hover:bg-gray-50/50 border-gray-100',
     tableCell: isDarkMode ? 'border-[#333]' : 'border-gray-100',
@@ -238,7 +238,7 @@ export default function ClientTracking({ isDarkMode }) {
               </div>
               <div>
                 <label className={`block text-xs font-semibold ${isDarkMode ? 'text-[#177ddc]' : 'text-blue-600'} mb-1 uppercase tracking-wider`}>Lead Following</label>
-                <input type="date" name="lead_following" value={formData.lead_following} onChange={handleInputChange} className={`w-full px-3 py-2 ${isDarkMode ? 'bg-[#111b26] border-[#153450] text-[#fff]' : 'bg-blue-50/50 border-blue-200 text-gray-900'} border rounded outline-none transition-all text-sm`} />
+                <input type="date" name="lead_following" value={formData.lead_following} onChange={handleInputChange} className={`w-full px-3 py-2 ${isDarkMode ? 'bg-[#111b26] border-[#153450] text-[#fff]' : 'bg-white border-blue-200 text-black'} border rounded outline-none transition-all text-sm`} />
               </div>
 
               {/* Row 4 */}
@@ -410,7 +410,7 @@ export default function ClientTracking({ isDarkMode }) {
                           </div>
                           {isDue && <div className="text-[9px] uppercase font-black text-red-500 mt-0.5 animate-pulse">Action Required</div>}
                         </td>
-                        <td className={`px-4 py-3 text-xs italic ${lostTextClass} ${isDue ? (isDarkMode ? 'text-red-300' : 'text-red-600') : 'text-black dark:text-white'}`}>
+                        <td className={`px-4 py-3 text-xs italic ${lostTextClass} ${isDue ? (isDarkMode ? 'text-red-300' : 'text-red-600') : (isDarkMode ? 'text-white' : 'text-black')}`}>
                           {item.memo || '-'}
                         </td>
                       </tr>
