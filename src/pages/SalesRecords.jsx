@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Form, Button, Card, Table, Tag, Space, Popconfirm, Select, message
+  Form, Button, Card, Table, Tag, Space, Popconfirm, Select, message, Input, DatePicker, TimePicker
 } from 'antd';
 import { 
   PrinterOutlined, EditOutlined, PlusOutlined, 
@@ -40,8 +40,6 @@ const SalesRecords = ({ isDarkMode }) => {
   const [selectedMonth, setSelectedMonth] = useState((dayjs().month() + 1).toString());
 
   // --- UI Constants for Refactoring ---
-  const inputClasses = `h-9 px-3 border border-slate-200 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all`;
-  const selectClasses = `${inputClasses} pr-8`;
   const labelClasses = "text-[11px] font-semibold text-slate-500 ml-1 uppercase tracking-wider";
   const fieldWrapperClasses = "flex flex-col gap-1";
 
@@ -454,18 +452,13 @@ const SalesRecords = ({ isDarkMode }) => {
             result: 'N/A',
             benefit: [],
           }}
-          size="small"
         >
           <div className="flex flex-wrap items-end gap-3 mb-6">
             {/* Annual */}
             <div className={fieldWrapperClasses}>
               <label className={labelClasses}>Annual</label>
               <Form.Item name="annual_year" rules={[{ required: true }]} noStyle>
-                <select className={`${selectClasses} w-24`}>
-                  {annualYearOptions.filter(opt => opt.value !== 'all').map(opt => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
+                <Select className="w-24" options={annualYearOptions.filter(opt => opt.value !== 'all')} />
               </Form.Item>
             </div>
 
@@ -473,11 +466,7 @@ const SalesRecords = ({ isDarkMode }) => {
             <div className={fieldWrapperClasses}>
               <label className={labelClasses}>Month</label>
               <Form.Item name="month" rules={[{ required: true }]} noStyle>
-                <select className={`${selectClasses} w-24`}>
-                  {monthOptions.map(opt => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
+                <Select className="w-24" options={monthOptions} />
               </Form.Item>
             </div>
 
@@ -485,10 +474,10 @@ const SalesRecords = ({ isDarkMode }) => {
             <div className={fieldWrapperClasses}>
               <label className={labelClasses}>Type</label>
               <Form.Item name="type" rules={[{ required: true }]} noStyle>
-                <select className={`${selectClasses} w-24`}>
-                  <option value="Buy">Buy</option>
-                  <option value="Sell">Sell</option>
-                </select>
+                <Select className="w-24">
+                  <Select.Option value="Buy">Buy</Select.Option>
+                  <Select.Option value="Sell">Sell</Select.Option>
+                </Select>
               </Form.Item>
             </div>
 
@@ -496,10 +485,10 @@ const SalesRecords = ({ isDarkMode }) => {
             <div className={fieldWrapperClasses}>
               <label className={labelClasses}>Condition</label>
               <Form.Item name="car_type" rules={[{ required: true }]} noStyle>
-                <select className={`${selectClasses} w-24`}>
-                  <option value="New">New</option>
-                  <option value="Used">Used</option>
-                </select>
+                <Select className="w-24">
+                  <Select.Option value="New">New</Select.Option>
+                  <Select.Option value="Used">Used</Select.Option>
+                </Select>
               </Form.Item>
             </div>
 
@@ -507,7 +496,7 @@ const SalesRecords = ({ isDarkMode }) => {
             <div className={fieldWrapperClasses}>
               <label className={labelClasses}>Stock#</label>
               <Form.Item name="stock_number" rules={[{ required: true }]} noStyle>
-                <input type="text" className={`${inputClasses} w-28`} placeholder="H25XXX" />
+                <Input className="w-28" placeholder="H25XXX" />
               </Form.Item>
             </div>
 
@@ -515,7 +504,7 @@ const SalesRecords = ({ isDarkMode }) => {
             <div className={fieldWrapperClasses}>
               <label className={labelClasses}>Customer Name</label>
               <Form.Item name="name" rules={[{ required: true }]} noStyle>
-                <input type="text" className={`${inputClasses} w-44`} placeholder="e.g. Ming Lo Kim" />
+                <Input className="w-44" placeholder="e.g. Ming Lo Kim" />
               </Form.Item>
             </div>
 
@@ -523,7 +512,7 @@ const SalesRecords = ({ isDarkMode }) => {
             <div className={fieldWrapperClasses}>
               <label className={labelClasses}>Contact</label>
               <Form.Item name="contact_number" noStyle>
-                <input type="text" className={`${inputClasses} w-36`} placeholder="(604) 783-6903" onChange={handleContactChange} />
+                <Input className="w-36" placeholder="(604) 783-6903" onChange={handleContactChange} />
               </Form.Item>
             </div>
 
@@ -531,11 +520,7 @@ const SalesRecords = ({ isDarkMode }) => {
             <div className={fieldWrapperClasses}>
               <label className={labelClasses}>Year</label>
               <Form.Item name="year" noStyle>
-                <select className={`${selectClasses} w-24`}>
-                  {yearOptions.map(opt => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
+                <Select className="w-24" options={yearOptions} />
               </Form.Item>
             </div>
 
@@ -543,7 +528,7 @@ const SalesRecords = ({ isDarkMode }) => {
             <div className={fieldWrapperClasses}>
               <label className={labelClasses}>Brand</label>
               <Form.Item name="brand" noStyle>
-                <input type="text" className={`${inputClasses} w-28`} placeholder="Honda" />
+                <Input className="w-28" placeholder="Honda" />
               </Form.Item>
             </div>
 
@@ -551,7 +536,7 @@ const SalesRecords = ({ isDarkMode }) => {
             <div className={fieldWrapperClasses}>
               <label className={labelClasses}>Model</label>
               <Form.Item name="model" noStyle>
-                <input type="text" className={`${inputClasses} w-28`} placeholder="Civic" />
+                <Input className="w-28" placeholder="Civic" />
               </Form.Item>
             </div>
 
@@ -559,7 +544,7 @@ const SalesRecords = ({ isDarkMode }) => {
             <div className={fieldWrapperClasses}>
               <label className={labelClasses}>Color</label>
               <Form.Item name="color" noStyle>
-                <input type="text" className={`${inputClasses} w-24`} placeholder="Red" />
+                <Input className="w-24" placeholder="Red" />
               </Form.Item>
             </div>
 
@@ -567,7 +552,7 @@ const SalesRecords = ({ isDarkMode }) => {
             <div className={fieldWrapperClasses}>
               <label className={labelClasses}>Buy Date</label>
               <Form.Item name="date_of_buy" noStyle>
-                <input type="date" className={`${inputClasses} w-36`} />
+                <Input type="date" className="w-36" />
               </Form.Item>
             </div>
 
@@ -575,7 +560,7 @@ const SalesRecords = ({ isDarkMode }) => {
             <div className={fieldWrapperClasses}>
               <label className={labelClasses}>Deliv. Date</label>
               <Form.Item name="date_delivery" noStyle>
-                <input type="date" className={`${inputClasses} w-36`} />
+                <Input type="date" className="w-36" />
               </Form.Item>
             </div>
 
@@ -583,7 +568,7 @@ const SalesRecords = ({ isDarkMode }) => {
             <div className={fieldWrapperClasses}>
               <label className={labelClasses}>Deliv. Time</label>
               <Form.Item name="delivery_time" noStyle>
-                <input type="time" className={`${inputClasses} w-28`} />
+                <Input type="time" className="w-28" />
               </Form.Item>
             </div>
 
@@ -591,13 +576,13 @@ const SalesRecords = ({ isDarkMode }) => {
             <div className={fieldWrapperClasses}>
               <label className={labelClasses}>Status</label>
               <Form.Item name="result" noStyle>
-                <select className={`${selectClasses} w-32`}>
-                  <option value="N/A">N/A</option>
-                  <option value="Gas Full">Gas Full</option>
-                  <option value="Cleaned">Cleaned</option>
-                  <option value="Delivered">Delivered</option>
-                  <option value="Canceled">Canceled</option>
-                </select>
+                <Select className="w-32">
+                  <Select.Option value="N/A">N/A</Select.Option>
+                  <Select.Option value="Gas Full">Gas Full</Select.Option>
+                  <Select.Option value="Cleaned">Cleaned</Select.Option>
+                  <Select.Option value="Delivered">Delivered</Select.Option>
+                  <Select.Option value="Canceled">Canceled</Select.Option>
+                </Select>
               </Form.Item>
             </div>
 
@@ -619,7 +604,7 @@ const SalesRecords = ({ isDarkMode }) => {
             <div className={fieldWrapperClasses}>
               <label className={labelClasses}>Remarks</label>
               <Form.Item name="part_incentive" noStyle>
-                <input type="text" className={`${inputClasses} w-48`} placeholder="Notes..." />
+                <Input className="w-48" placeholder="Notes..." />
               </Form.Item>
             </div>
           </div>
