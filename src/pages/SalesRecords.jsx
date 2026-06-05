@@ -604,7 +604,7 @@ const SalesRecords = ({ isDarkMode }) => {
             <div className={fieldWrapperClasses}>
               <label className={labelClasses}>Remarks</label>
               <Form.Item name="part_incentive" noStyle>
-                <Input className="w-48" placeholder="Notes..." />
+                <Input className="w-[560px]" placeholder="Notes..." />
               </Form.Item>
             </div>
           </div>
