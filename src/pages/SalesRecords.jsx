@@ -12,6 +12,18 @@ import * as XLSX from 'xlsx';
 import { supabase } from '../lib/supabase';
 import { formatPhoneNumber } from '../utils/formatters';
 
+const BENEFIT_OPTIONS = [
+  { value: 'mat', label: 'Mat' },
+  { value: 'trunk_tray', label: 'Trunk Tray' },
+  { value: 'window_tint', label: 'Window Tint' },
+  { value: 'door_visor', label: 'Door Visor' },
+  { value: 'cross_bar', label: 'Cross Bar' },
+  { value: 'roof_rail', label: 'Roof Rail' },
+  { value: 'engine_oil_1', label: 'Engine Oil x1' },
+  { value: 'engine_oil_2', label: 'Engine Oil x2' },
+  { value: 'engine_oil_3', label: 'Engine Oil x3' }
+];
+
 const SalesRecords = ({ isDarkMode }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -42,6 +54,22 @@ const SalesRecords = ({ isDarkMode }) => {
     setIsEditing(true);
     setEditingId(record.id);
     
+    // Handle benefit multi-select data recovery
+    let benefitValues = [];
+    try {
+      if (record.benefit) {
+        // Try parsing as JSON array
+        if (record.benefit.startsWith('[') && record.benefit.endsWith(']')) {
+          benefitValues = JSON.parse(record.benefit);
+        } else {
+          // Fallback for old plain text data
+          benefitValues = [record.benefit];
+        }
+      }
+    } catch (e) {
+      benefitValues = record.benefit ? [record.benefit] : [];
+    }
+
     // Fill form with record data
     form.setFieldsValue({
       ...record,
@@ -51,6 +79,7 @@ const SalesRecords = ({ isDarkMode }) => {
       date_of_buy: record.date_of_buy || null,
       date_delivery: record.date_delivery || null,
       delivery_time: record.delivery_time || null,
+      benefit: benefitValues,
     });
 
     // Scroll to top
@@ -67,7 +96,7 @@ const SalesRecords = ({ isDarkMode }) => {
       month: (dayjs().month() + 1).toString(),
       year: dayjs().year().toString(),
       result: 'N/A',
-      benefit: 'N/A',
+      benefit: [],
       benefit_qty: 0,
       type: 'Buy',
       car_type: 'New',
@@ -218,7 +247,7 @@ const SalesRecords = ({ isDarkMode }) => {
         date_delivery: values.date_delivery ? (dayjs.isDayjs(values.date_delivery) ? values.date_delivery.format('YYYY-MM-DD') : values.date_delivery) : null,
         delivery_time: values.delivery_time ? (dayjs.isDayjs(values.delivery_time) ? values.delivery_time.format('HH:mm:ss') : values.delivery_time) : null,
         result: values.result,
-        benefit: values.benefit,
+        benefit: JSON.stringify(values.benefit || []),
         benefit_qty: parseInt(values.benefit_qty || 0),
         part_incentive: values.part_incentive,
       };
@@ -307,7 +336,37 @@ const SalesRecords = ({ isDarkMode }) => {
     { title: 'Purchase Date', dataIndex: 'date_of_buy', key: 'date_of_buy' },
     { title: 'Delivery Date', dataIndex: 'date_delivery', key: 'date_delivery' },
     { title: 'Status', dataIndex: 'result', key: 'result' },
-    { title: 'Benefit', dataIndex: 'benefit', key: 'benefit' },
+    { 
+      title: 'Benefit', 
+      dataIndex: 'benefit', 
+      key: 'benefit',
+      render: (text) => {
+        if (!text || text === 'N/A') return '-';
+        
+        let benefitList = [];
+        try {
+          if (text.startsWith('[') && text.endsWith(']')) {
+            benefitList = JSON.parse(text);
+          } else {
+            benefitList = [text];
+          }
+        } catch (e) {
+          benefitList = [text];
+        }
+
+        if (benefitList.length === 0) return '-';
+
+        return (
+          <Space size={[0, 4]} wrap>
+            {benefitList.map((val) => {
+              const option = BENEFIT_OPTIONS.find(opt => opt.value === val);
+              const label = option ? option.label : val;
+              return <Tag color="blue" key={val}>{label}</Tag>;
+            })}
+          </Space>
+        );
+      }
+    },
     { title: 'Qty', dataIndex: 'benefit_qty', key: 'benefit_qty' },
     { title: 'Remarks', dataIndex: 'part_incentive', key: 'part_incentive', width: 200 },
     {
@@ -395,7 +454,7 @@ const SalesRecords = ({ isDarkMode }) => {
             car_type: 'New',
             year: dayjs().year().toString(),
             result: 'N/A',
-            benefit: 'N/A',
+            benefit: [],
             benefit_qty: 0,
           }}
           size="small"
@@ -549,12 +608,13 @@ const SalesRecords = ({ isDarkMode }) => {
             <div className={fieldWrapperClasses}>
               <label className={labelClasses}>Benefit</label>
               <Form.Item name="benefit" noStyle>
-                <select className={`${selectClasses} w-44`}>
-                  <option value="N/A">N/A</option>
-                  <option value="All season mat">All season mat</option>
-                  <option value="Trunk tray">Trunk tray</option>
-                  <option value="Oil change service">Oil change service</option>
-                </select>
+                <Select 
+                  mode="multiple" 
+                  options={BENEFIT_OPTIONS} 
+                  placeholder="Select"
+                  className="w-44"
+                  maxTagCount="responsive"
+                />
               </Form.Item>
             </div>
 
