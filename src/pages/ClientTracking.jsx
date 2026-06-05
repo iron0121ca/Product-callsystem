@@ -227,6 +227,7 @@ export default function ClientTracking({ isDarkMode }) {
                 <label className={`block text-xs font-semibold ${isDarkMode ? 'text-[#177ddc]' : 'text-blue-600'} mb-1 uppercase tracking-wider`}>Status</label>
                 <select name="status" value={formData.status} onChange={handleInputChange} className={`w-full px-3 py-2 ${themeClasses.input} border rounded outline-none text-sm font-bold`}>
                   <option className={isDarkMode ? 'bg-[#1f1f1f]' : ''}>In progress</option>
+                  <option className={isDarkMode ? 'bg-[#1f1f1f]' : ''}>Contacted</option>
                   <option className={isDarkMode ? 'bg-[#1f1f1f]' : ''}>Appointment</option>
                   <option className={isDarkMode ? 'bg-[#1f1f1f]' : ''}>Sold</option>
                   <option className={isDarkMode ? 'bg-[#1f1f1f]' : ''}>Lost</option>
@@ -315,6 +316,7 @@ export default function ClientTracking({ isDarkMode }) {
                     const isLost = item.status === 'Lost';
                     const isSold = item.status === 'Sold';
                     const isAppt = item.status === 'Appointment';
+                    const isContacted = item.status === 'Contacted';
                     
                     // --- Precise Local Date Logic ---
                     const todayObj = new Date();
@@ -368,6 +370,7 @@ export default function ClientTracking({ isDarkMode }) {
                             isLost ? 'bg-gray-200 text-gray-500' :
                             isSold ? 'bg-green-500 text-white' :
                             isAppt ? 'bg-purple-500 text-white' :
+                            isContacted ? 'bg-orange-500 text-white' :
                             (isDarkMode ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-50 text-blue-600')
                           }`}>
                             {item.status || 'In progress'}
