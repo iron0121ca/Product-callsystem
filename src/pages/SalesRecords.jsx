@@ -19,6 +19,7 @@ const BENEFIT_OPTIONS = [
   { value: 'door_visor', label: 'Door Visor' },
   { value: 'cross_bar', label: 'Cross Bar' },
   { value: 'roof_rail', label: 'Roof Rail' },
+  { value: 'dashcam', label: 'Dashcam' },
   { value: 'engine_oil_1', label: 'Engine Oil x1' },
   { value: 'engine_oil_2', label: 'Engine Oil x2' },
   { value: 'engine_oil_3', label: 'Engine Oil x3' }
@@ -97,7 +98,6 @@ const SalesRecords = ({ isDarkMode }) => {
       year: dayjs().year().toString(),
       result: 'N/A',
       benefit: [],
-      benefit_qty: 0,
       type: 'Buy',
       car_type: 'New',
       date_of_buy: null,
@@ -248,7 +248,6 @@ const SalesRecords = ({ isDarkMode }) => {
         delivery_time: values.delivery_time ? (dayjs.isDayjs(values.delivery_time) ? values.delivery_time.format('HH:mm:ss') : values.delivery_time) : null,
         result: values.result,
         benefit: JSON.stringify(values.benefit || []),
-        benefit_qty: parseInt(values.benefit_qty || 0),
         part_incentive: values.part_incentive,
       };
 
@@ -367,7 +366,6 @@ const SalesRecords = ({ isDarkMode }) => {
         );
       }
     },
-    { title: 'Qty', dataIndex: 'benefit_qty', key: 'benefit_qty' },
     { title: 'Remarks', dataIndex: 'part_incentive', key: 'part_incentive', width: 200 },
     {
       title: 'Action',
@@ -455,7 +453,6 @@ const SalesRecords = ({ isDarkMode }) => {
             year: dayjs().year().toString(),
             result: 'N/A',
             benefit: [],
-            benefit_qty: 0,
           }}
           size="small"
         >
@@ -615,18 +612,6 @@ const SalesRecords = ({ isDarkMode }) => {
                   className="w-44"
                   maxTagCount="responsive"
                 />
-              </Form.Item>
-            </div>
-
-            {/* Benefit Qty */}
-            <div className={fieldWrapperClasses}>
-              <label className={labelClasses}>Qty</label>
-              <Form.Item name="benefit_qty" noStyle>
-                <select className={`${selectClasses} w-20`}>
-                  {Array.from({ length: 11 }, (_, i) => (
-                    <option key={i} value={i}>{i}</option>
-                  ))}
-                </select>
               </Form.Item>
             </div>
 
