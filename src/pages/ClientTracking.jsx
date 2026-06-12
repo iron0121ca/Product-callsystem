@@ -19,7 +19,7 @@ export default function ClientTracking({ isDarkMode }) {
     last_name: '',
     phone_number: '',
     email: '',
-    vehicle_brand: '',
+    desired_vehicle: '',
     condition: 'Any',
     budget_amount: '',
     currently_vehicle: '',
@@ -116,7 +116,7 @@ export default function ClientTracking({ isDarkMode }) {
       last_name: item.last_name || '',
       phone_number: item.phone_number || '',
       email: item.email || '',
-      vehicle_brand: item.vehicle_brand || '',
+      desired_vehicle: item.desired_vehicle || '',
       condition: item.condition || 'Any',
       budget_amount: item.budget_amount || '',
       currently_vehicle: item.currently_vehicle || '',
@@ -194,8 +194,8 @@ export default function ClientTracking({ isDarkMode }) {
 
               {/* Row 2 */}
               <div>
-                <label className={`block text-xs font-semibold ${themeClasses.label} mb-1 uppercase tracking-wider`}>Vehicle Brand</label>
-                <input name="vehicle_brand" value={formData.vehicle_brand} onChange={handleInputChange} className={`w-full px-3 py-2 ${themeClasses.input} border rounded outline-none transition-all text-sm`} placeholder="e.g. Honda" />
+                <label className={`block text-xs font-semibold ${themeClasses.label} mb-1 uppercase tracking-wider`}>Desired Vehicle</label>
+                <input name="desired_vehicle" value={formData.desired_vehicle} onChange={handleInputChange} className={`w-full px-3 py-2 ${themeClasses.input} border rounded outline-none transition-all text-sm`} placeholder="e.g. Honda" />
               </div>
               <div>
                 <label className={`block text-xs font-semibold ${themeClasses.label} mb-1 uppercase tracking-wider`}>Condition</label>
@@ -395,7 +395,7 @@ export default function ClientTracking({ isDarkMode }) {
                             } ${isDue ? 'ring-1 ring-red-400/50' : ''} ${(isLost || isCancelled) ? 'grayscale opacity-50' : ''}`}>
                               {item.condition}
                             </span>
-                            <span className={`${isDue ? textHighlightClass : ((isLost || isCancelled) ? (isDarkMode ? 'text-slate-500' : 'text-black') : (isDarkMode ? themeClasses.text : 'text-black'))} font-medium`}>{item.vehicle_brand}</span>
+                            <span className={`${isDue ? textHighlightClass : ((isLost || isCancelled) ? (isDarkMode ? 'text-slate-500' : 'text-black') : (isDarkMode ? themeClasses.text : 'text-black'))} font-medium`}>{item.desired_vehicle}</span>
                           </div>
                         </td>
                         <td className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>
