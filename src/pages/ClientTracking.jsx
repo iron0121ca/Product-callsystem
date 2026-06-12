@@ -338,7 +338,7 @@ export default function ClientTracking({ isDarkMode }) {
                       : '';
                     
                     // --- Lost Style ---
-                    const lostTextClass = (isLost || isCancelled) ? 'line-through decoration-red-500 decoration-2' : '';
+                    const lostTextClass = isLost ? 'line-through decoration-red-500 decoration-2' : '';
                     
                     const textHighlightClass = isDue 
                       ? (isDarkMode ? 'text-red-400 font-semibold' : 'text-red-600 font-bold') 
