@@ -231,6 +231,7 @@ export default function ClientTracking({ isDarkMode }) {
                   <option className={isDarkMode ? 'bg-[#1f1f1f]' : ''}>Appointment</option>
                   <option className={isDarkMode ? 'bg-[#1f1f1f]' : ''}>Sold</option>
                   <option className={isDarkMode ? 'bg-[#1f1f1f]' : ''}>Lost</option>
+                  <option className={isDarkMode ? 'bg-[#1f1f1f]' : ''}>Cancelled</option>
                 </select>
               </div>
               <div>
@@ -314,6 +315,7 @@ export default function ClientTracking({ isDarkMode }) {
                   dataList.map((item) => {
                     // --- Status Logic ---
                     const isLost = item.status === 'Lost';
+                    const isCancelled = item.status === 'Cancelled';
                     const isSold = item.status === 'Sold';
                     const isAppt = item.status === 'Appointment';
                     const isContacted = item.status === 'Contacted';
@@ -329,21 +331,21 @@ export default function ClientTracking({ isDarkMode }) {
                     const cleanLeadFollowing = item.lead_following ? item.lead_following.split(' ')[0].split('T')[0] : '';
                     
                     // --- Highlight Condition: localTodayStr >= cleanLeadFollowing ---
-                    const isDue = cleanLeadFollowing && localTodayStr >= cleanLeadFollowing && !isLost && !isSold;
+                    const isDue = cleanLeadFollowing && localTodayStr >= cleanLeadFollowing && !isLost && !isSold && !isCancelled;
                     
                     const rowHighlightClass = isDue 
                       ? (isDarkMode ? 'bg-red-950/30 border-l-4 border-l-red-500' : 'bg-red-50/60 hover:bg-red-50 border-l-4 border-l-red-500') 
                       : '';
                     
                     // --- Lost Style ---
-                    const lostTextClass = isLost ? 'line-through decoration-red-500 decoration-2' : '';
+                    const lostTextClass = (isLost || isCancelled) ? 'line-through decoration-red-500 decoration-2' : '';
                     
                     const textHighlightClass = isDue 
                       ? (isDarkMode ? 'text-red-400 font-semibold' : 'text-red-600 font-bold') 
-                      : (isLost ? (isDarkMode ? 'text-slate-400' : 'text-black') : themeClasses.text);
+                      : ((isLost || isCancelled) ? (isDarkMode ? 'text-slate-400' : 'text-black') : themeClasses.text);
 
                     return (
-                      <tr key={item.id} className={`${themeClasses.tableRow} ${rowHighlightClass} ${isLost ? 'bg-gray-500/5' : ''} transition-colors`}>
+                      <tr key={item.id} className={`${themeClasses.tableRow} ${rowHighlightClass} ${(isLost || isCancelled) ? 'bg-gray-500/5' : ''} transition-colors`}>
                         <td className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>
                           <div className="flex items-center gap-3">
                             <button 
@@ -362,12 +364,13 @@ export default function ClientTracking({ isDarkMode }) {
                             </button>
                           </div>
                         </td>
-                        <td className={`px-4 py-3 border-r ${themeClasses.tableCell} text-xs ${isDue ? (isDarkMode ? 'text-red-300' : 'text-red-600') : (isLost ? (isDarkMode ? 'text-slate-500' : 'text-black') : (isDarkMode ? themeClasses.text : 'text-black'))}`}>
+                        <td className={`px-4 py-3 border-r ${themeClasses.tableCell} text-xs ${isDue ? (isDarkMode ? 'text-red-300' : 'text-red-600') : ((isLost || isCancelled) ? (isDarkMode ? 'text-slate-500' : 'text-black') : (isDarkMode ? themeClasses.text : 'text-black'))}`}>
                           <div className={lostTextClass}>{item.created_at ? dayjs(item.created_at).format('MMM DD, HH:mm') : '-'}</div>
                         </td>
                         <td className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>
                           <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${
                             isLost ? 'bg-gray-200 text-gray-500' :
+                            isCancelled ? 'bg-red-100 text-red-600' :
                             isSold ? 'bg-green-500 text-white' :
                             isAppt ? 'bg-purple-500 text-white' :
                             isContacted ? 'bg-orange-500 text-white' :
@@ -380,8 +383,8 @@ export default function ClientTracking({ isDarkMode }) {
                           <div className={`font-bold ${textHighlightClass} ${lostTextClass}`}>{item.first_name} {item.last_name}</div>
                         </td>
                         <td className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>
-                          <div className={`${isDue ? (isDarkMode ? 'text-red-200' : 'text-red-600') : (isLost ? (isDarkMode ? 'text-slate-500' : 'text-black') : (isDarkMode ? 'text-[#fff]' : 'text-black'))} ${lostTextClass}`}>{item.phone_number}</div>
-                          <div className={`${isDue ? (isDarkMode ? 'text-red-400' : 'text-red-600') : (isLost ? (isDarkMode ? 'text-slate-500/50' : 'text-black') : (isDarkMode ? themeClasses.secondaryText : 'text-black'))} text-xs ${lostTextClass}`}>{item.email}</div>
+                          <div className={`${isDue ? (isDarkMode ? 'text-red-200' : 'text-red-600') : ((isLost || isCancelled) ? (isDarkMode ? 'text-slate-500' : 'text-black') : (isDarkMode ? 'text-[#fff]' : 'text-black'))} ${lostTextClass}`}>{item.phone_number}</div>
+                          <div className={`${isDue ? (isDarkMode ? 'text-red-400' : 'text-red-600') : ((isLost || isCancelled) ? (isDarkMode ? 'text-slate-500/50' : 'text-black') : (isDarkMode ? themeClasses.secondaryText : 'text-black'))} text-xs ${lostTextClass}`}>{item.email}</div>
                         </td>
                         <td className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>
                           <div className={`flex items-center gap-2 ${lostTextClass}`}>
@@ -389,26 +392,26 @@ export default function ClientTracking({ isDarkMode }) {
                               item.condition === 'New' 
                                 ? (isDarkMode ? 'bg-[#111b26] text-[#177ddc]' : 'bg-blue-100 text-blue-700') 
                                 : (isDarkMode ? 'bg-[#162312] text-[#49aa19]' : 'bg-green-100 text-green-700')
-                            } ${isDue ? 'ring-1 ring-red-400/50' : ''} ${isLost ? 'grayscale opacity-50' : ''}`}>
+                            } ${isDue ? 'ring-1 ring-red-400/50' : ''} ${(isLost || isCancelled) ? 'grayscale opacity-50' : ''}`}>
                               {item.condition}
                             </span>
-                            <span className={`${isDue ? textHighlightClass : (isLost ? (isDarkMode ? 'text-slate-500' : 'text-black') : (isDarkMode ? themeClasses.text : 'text-black'))} font-medium`}>{item.vehicle_brand}</span>
+                            <span className={`${isDue ? textHighlightClass : ((isLost || isCancelled) ? (isDarkMode ? 'text-slate-500' : 'text-black') : (isDarkMode ? themeClasses.text : 'text-black'))} font-medium`}>{item.vehicle_brand}</span>
                           </div>
                         </td>
                         <td className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>
-                          <div className={`font-semibold ${isDue ? textHighlightClass : (isLost ? (isDarkMode ? 'text-slate-500' : 'text-black') : (isDarkMode ? themeClasses.text : 'text-black'))} ${lostTextClass}`}>
+                          <div className={`font-semibold ${isDue ? textHighlightClass : ((isLost || isCancelled) ? (isDarkMode ? 'text-slate-500' : 'text-black') : (isDarkMode ? themeClasses.text : 'text-black'))} ${lostTextClass}`}>
                             {isNaN(item.budget_amount) ? item.budget_amount : `$${Number(item.budget_amount || 0).toLocaleString()}`}
                           </div>
-                          <div className={`${isDue ? (isDarkMode ? 'text-red-400' : 'text-red-600') : (isLost ? (isDarkMode ? 'text-slate-500' : 'text-black') : (isDarkMode ? 'text-[#177ddc]' : 'text-blue-600'))} text-[10px] font-bold uppercase ${lostTextClass}`}>{item.lien}</div>
+                          <div className={`${isDue ? (isDarkMode ? 'text-red-400' : 'text-red-600') : ((isLost || isCancelled) ? (isDarkMode ? 'text-slate-500' : 'text-black') : (isDarkMode ? 'text-[#177ddc]' : 'text-blue-600'))} text-[10px] font-bold uppercase ${lostTextClass}`}>{item.lien}</div>
                         </td>
-                        <td className={`px-4 py-3 border-r ${themeClasses.tableCell} ${isDue ? (isDarkMode ? 'text-red-300' : 'text-red-600') : (isLost ? (isDarkMode ? 'text-slate-500' : 'text-black') : (isDarkMode ? 'text-[#aaa]' : 'text-black'))} ${lostTextClass}`}>
+                        <td className={`px-4 py-3 border-r ${themeClasses.tableCell} ${isDue ? (isDarkMode ? 'text-red-300' : 'text-red-600') : ((isLost || isCancelled) ? (isDarkMode ? 'text-slate-500' : 'text-black') : (isDarkMode ? 'text-[#aaa]' : 'text-black'))} ${lostTextClass}`}>
                           {item.currently_vehicle || '-'}
                         </td>
-                        <td className={`px-4 py-3 border-r ${themeClasses.tableCell} ${isDue ? (isDarkMode ? 'text-red-400' : 'text-red-600') : (isLost ? (isDarkMode ? 'text-slate-500/50' : 'text-black') : (isDarkMode ? themeClasses.secondaryText : 'text-black'))} ${lostTextClass}`}>
+                        <td className={`px-4 py-3 border-r ${themeClasses.tableCell} ${isDue ? (isDarkMode ? 'text-red-400' : 'text-red-600') : ((isLost || isCancelled) ? (isDarkMode ? 'text-slate-500/50' : 'text-black') : (isDarkMode ? themeClasses.secondaryText : 'text-black'))} ${lostTextClass}`}>
                           {item.buy_vehicle_date ? dayjs(item.buy_vehicle_date).format('MM/DD/YYYY') : '-'}
                         </td>
                         <td className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>
-                          <div className={`font-bold ${isDue ? (isDarkMode ? 'text-red-400' : 'text-red-600') : (isLost ? (isDarkMode ? 'text-slate-500' : 'text-black') : (isDarkMode ? 'text-[#177ddc]' : 'text-blue-600'))} ${lostTextClass}`}>
+                          <div className={`font-bold ${isDue ? (isDarkMode ? 'text-red-400' : 'text-red-600') : ((isLost || isCancelled) ? (isDarkMode ? 'text-slate-500' : 'text-black') : (isDarkMode ? 'text-[#177ddc]' : 'text-blue-600'))} ${lostTextClass}`}>
                             {dayjs(item.lead_following).format('MM/DD/YYYY')}
                           </div>
                           {isDue && <div className="text-[9px] uppercase font-black text-red-500 mt-0.5 animate-pulse">Action Required</div>}
