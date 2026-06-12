@@ -25,7 +25,7 @@ export default function ClientTracking({ isDarkMode }) {
     currently_vehicle: '',
     lien: 'Cash',
     status: 'In progress',
-    buy_vehicle_date: '',
+    appointment_date: '',
     lead_following: dayjs().add(3, 'day').format('YYYY-MM-DD'),
     memo: ''
   };
@@ -122,7 +122,7 @@ export default function ClientTracking({ isDarkMode }) {
       currently_vehicle: item.currently_vehicle || '',
       lien: item.lien || 'Cash',
       status: item.status || 'In progress',
-      buy_vehicle_date: item.buy_vehicle_date || '',
+      appointment_date: item.appointment_date || '',
       lead_following: item.lead_following || '',
       memo: item.memo || ''
     });
@@ -235,8 +235,8 @@ export default function ClientTracking({ isDarkMode }) {
                 </select>
               </div>
               <div>
-                <label className={`block text-xs font-semibold ${themeClasses.label} mb-1 uppercase tracking-wider`}>Buy Vehicle Date</label>
-                <input type="date" name="buy_vehicle_date" value={formData.buy_vehicle_date} onChange={handleInputChange} className={`w-full px-3 py-2 ${themeClasses.input} border rounded outline-none transition-all text-sm`} />
+                <label className={`block text-xs font-semibold ${themeClasses.label} mb-1 uppercase tracking-wider`}>Appointment Date</label>
+                <input type="date" name="appointment_date" value={formData.appointment_date} onChange={handleInputChange} className={`w-full px-3 py-2 ${themeClasses.input} border rounded outline-none transition-all text-sm`} />
               </div>
               <div>
                 <label className={`block text-xs font-semibold ${isDarkMode ? 'text-[#177ddc]' : 'text-blue-600'} mb-1 uppercase tracking-wider`}>Lead Following</label>
@@ -301,7 +301,7 @@ export default function ClientTracking({ isDarkMode }) {
                   <th className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>Desired Vehicle</th>
                   <th className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>Budget & Lien</th>
                   <th className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>Current Car</th>
-                  <th className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>Buy Date</th>
+                  <th className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>Appointment</th>
                   <th className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>Lead Following</th>
                   <th className="px-4 py-3">Memo</th>
                 </tr>
@@ -408,7 +408,7 @@ export default function ClientTracking({ isDarkMode }) {
                           {item.currently_vehicle || '-'}
                         </td>
                         <td className={`px-4 py-3 border-r ${themeClasses.tableCell} ${isDue ? (isDarkMode ? 'text-red-400' : 'text-red-600') : ((isLost || isCancelled) ? (isDarkMode ? 'text-slate-500/50' : 'text-black') : (isDarkMode ? themeClasses.secondaryText : 'text-black'))} ${lostTextClass}`}>
-                          {item.buy_vehicle_date ? dayjs(item.buy_vehicle_date).format('MM/DD/YYYY') : '-'}
+                          {item.appointment_date ? dayjs(item.appointment_date).format('MM/DD/YYYY') : '-'}
                         </td>
                         <td className={`px-4 py-3 border-r ${themeClasses.tableCell}`}>
                           <div className={`font-bold ${isDue ? (isDarkMode ? 'text-red-400' : 'text-red-600') : ((isLost || isCancelled) ? (isDarkMode ? 'text-slate-500' : 'text-black') : (isDarkMode ? 'text-[#177ddc]' : 'text-blue-600'))} ${lostTextClass}`}>
