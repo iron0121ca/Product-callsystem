@@ -1,32 +1,17 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { 
   Search, 
   UserPlus, 
   Phone, 
   Mail, 
-  Car, 
   Calendar, 
   DollarSign, 
   Clock, 
-  MessageSquare,
-  AlertCircle,
   MoreVertical,
-  ChevronDown
 } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../lib/supabase.js';
+import { formatPhoneNumber } from '../utils/formatters.js';
 import dayjs from 'dayjs';
-
-// --- Helper: Phone Formatting ---
-const formatPhoneNumber = (value) => {
-  if (!value) return value;
-  const phoneNumber = value.replace(/[^\d]/g, '');
-  const phoneNumberLength = phoneNumber.length;
-  if (phoneNumberLength < 4) return phoneNumber;
-  if (phoneNumberLength < 7) {
-    return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3)}`;
-  }
-  return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
-};
 
 const Following = () => {
   const [customers, setCustomers] = useState([]);
