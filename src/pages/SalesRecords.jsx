@@ -38,6 +38,7 @@ const SalesRecords = ({ isDarkMode }) => {
   // --- Filter State ---
   const [selectedYear, setSelectedYear] = useState(dayjs().year().toString());
   const [selectedMonth, setSelectedMonth] = useState((dayjs().month() + 1).toString());
+  const [showRecycleBin, setShowRecycleBin] = useState(false);
 
   // --- UI Constants for Refactoring ---
   const labelClasses = "text-[11px] font-semibold text-slate-500 ml-1 uppercase tracking-wider";
@@ -154,19 +155,30 @@ const SalesRecords = ({ isDarkMode }) => {
     fetchData();
   }, []);
 
-  // --- Dynamic Filtering Logic (Based on Delivery Date) ---
+  // --- Recycle Bin & Dynamic Filtering Logic ---
+  // Count cancelled records for badge
+  const cancelledCount = dataList.filter(item => item.result === 'Canceled').length;
+
   const filteredData = dataList.filter(item => {
+    // Recycle Bin view: show ONLY cancelled records (ignore year/month filters)
+    if (showRecycleBin) {
+      return item.result === 'Canceled';
+    }
+
+    // Default view: hide all cancelled records
+    if (item.result === 'Canceled') return false;
+
     // Rule: Always show records with no delivery date (Pending deals)
     if (!item.date_delivery) return true;
-    
+
     // If "All" is selected for both, show everything
     if (selectedYear === 'all' && selectedMonth === 'all') return true;
-    
+
     // Otherwise, check if delivery date matches filters
     const deliveryDate = dayjs(item.date_delivery);
     const yearMatch = selectedYear === 'all' || deliveryDate.year().toString() === selectedYear;
     const monthMatch = selectedMonth === 'all' || (deliveryDate.month() + 1).toString() === selectedMonth;
-    
+
     return yearMatch && monthMatch;
   });
 
@@ -635,9 +647,20 @@ const SalesRecords = ({ isDarkMode }) => {
         title="Recent Records" 
         extra={
           <div className="flex items-center gap-3 no-print">
+            {/* Recycle Bin Toggle */}
+            <Button
+              icon={<DeleteOutlined />}
+              type={showRecycleBin ? 'primary' : 'default'}
+              danger={showRecycleBin}
+              onClick={() => setShowRecycleBin(!showRecycleBin)}
+              title={showRecycleBin ? 'Back to active records' : `View cancelled records (${cancelledCount})`}
+            >
+              {showRecycleBin ? 'Recycle Bin' : ''}
+            </Button>
+
             {/* Filter Group */}
-            <Select 
-              value={selectedYear} 
+            <Select
+              value={selectedYear}
               onChange={setSelectedYear}
               style={{ width: 110 }}
               options={annualYearOptions}
