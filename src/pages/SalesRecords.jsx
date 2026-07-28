@@ -693,8 +693,8 @@ const SalesRecords = ({ isDarkMode }) => {
             </Space>
           </div>
         }
-        variant="outlined" 
-        styles={{ body: { padding: 0 } }}
+        variant="outlined"
+        styles={{ body: { padding: 0 }, header: { textAlign: 'left' } }}
         style={{ width: '100%' }}
       >
         <div style={{ width: '100%', overflowX: 'auto' }}>
