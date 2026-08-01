@@ -1,4 +1,5 @@
 @media print {
+  /* Hide UI elements not needed for print */
   .ant-card-head,
   .ant-btn,
   .ant-pagination,
@@ -32,6 +33,81 @@
   }
   .ant-table-content {
     overflow: visible !important;
+  }
+
+  /* ===== CRITICAL: Force black text for clear printing ===== */
+  /* Override all text to pure black on white paper */
+  * {
+    color: #000000 !important;
+    text-shadow: none !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Ensure table cells and content print clearly */
+  .ant-table,
+  .ant-table-cell,
+  .ant-table-thead > tr > th,
+  .ant-table-tbody > tr > td {
+    color: #000000 !important;
+    background: #ffffff !important;
+    border-color: #cccccc !important;
+  }
+
+  /* Table header row: keep it distinguishable with light gray bg */
+  .ant-table-thead > tr > th {
+    background: #e0e0e0 !important;
+    color: #000000 !important;
+    font-weight: 700 !important;
+    border-bottom: 2px solid #999999 !important;
+  }
+
+  /* Keep Tag components readable — preserve color backgrounds if needed,
+     but ensure text is black and readable */
+  .ant-tag {
+    color: #000000 !important;
+    font-weight: 600 !important;
+    border: 1px solid #999999 !important;
+    background: transparent !important;
+  }
+
+  /* Page title */
+  h2 {
+    color: #000000 !important;
+  }
+
+  /* Ensure the table itself is visible with borders */
+  .ant-table-bordered .ant-table-cell {
+    border-color: #bbbbbb !important;
+  }
+
+  /* Make the card title (Recent Records) visible */
+  .ant-card-head {
+    display: block !important;
+    color: #000000 !important;
+    border-bottom: 2px solid #999999 !important;
+    padding: 8px 0 !important;
+    margin-bottom: 8px !important;
+  }
+  .ant-card-head-wrapper,
+  .ant-card-head-title {
+    color: #000000 !important;
+    font-weight: 700 !important;
+  }
+  /* But still hide the extra/filter buttons in the card header */
+  .ant-card-extra {
+    display: none !important;
+  }
+
+  /* Remove link styling */
+  a {
+    color: #000000 !important;
+    text-decoration: none !important;
+  }
+
+  /* Ensure page margins are reasonable */
+  @page {
+    margin: 10mm;
   }
 }
 
