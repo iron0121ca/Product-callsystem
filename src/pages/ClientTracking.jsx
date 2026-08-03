@@ -19,6 +19,7 @@ const ClientTracking = ({ isDarkMode }) => {
   const [loading, setLoading] = useState(false);
   const [dataList, setDataList] = useState([]);
   const [tableLoading, setTableLoading] = useState(false);
+  const [searchText, setSearchText] = useState('');
 
   // --- Edit Mode State ---
   const [isEditing, setIsEditing] = useState(false);
@@ -545,13 +546,39 @@ const ClientTracking = ({ isDarkMode }) => {
       {/* Bottom Section: Data Table */}
       <Card
         title="Recent Records"
+        extra={
+          <div className="flex items-center gap-3 no-print">
+            <Input.Search
+              placeholder="Search name, phone, email..."
+              allowClear
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              onSearch={(value) => setSearchText(value)}
+              style={{ width: 240 }}
+            />
+          </div>
+        }
         variant="outlined"
         styles={{ body: { padding: 0 }, header: { textAlign: 'left' } }}
         style={{ width: '100%' }}
       >
         <div style={{ width: '100%', overflowX: 'auto' }}>
           <Table
-            dataSource={dataList}
+            dataSource={dataList.filter(item => {
+              if (!searchText.trim()) return true;
+              const query = searchText.trim().toLowerCase();
+              const firstName = (item.first_name || '').toLowerCase();
+              const lastName = (item.last_name || '').toLowerCase();
+              const phone = (item.phone_number || '').toLowerCase();
+              const email = (item.email || '').toLowerCase();
+              const phoneDigits = (item.phone_number || '').replace(/[^\d]/g, '');
+              const queryDigits = query.replace(/[^\d]/g, '');
+              return firstName.includes(query)
+                || lastName.includes(query)
+                || phone.includes(query)
+                || email.includes(query)
+                || phoneDigits.includes(queryDigits);
+            })}
             columns={columns.map(col => ({
               ...col,
               onCell: () => ({

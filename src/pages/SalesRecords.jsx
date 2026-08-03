@@ -39,6 +39,7 @@ const SalesRecords = ({ isDarkMode }) => {
   const [selectedYear, setSelectedYear] = useState(dayjs().year().toString());
   const [selectedMonth, setSelectedMonth] = useState((dayjs().month() + 1).toString());
   const [showRecycleBin, setShowRecycleBin] = useState(false);
+  const [searchText, setSearchText] = useState('');
 
   // --- UI Constants for Refactoring ---
   const labelClasses = "text-[11px] font-semibold text-slate-500 ml-1 uppercase tracking-wider";
@@ -180,6 +181,16 @@ const SalesRecords = ({ isDarkMode }) => {
     const monthMatch = selectedMonth === 'all' || (deliveryDate.month() + 1).toString() === selectedMonth;
 
     return yearMatch && monthMatch;
+  }).filter(item => {
+    // Search filter: name, contact_number (phone)
+    if (!searchText.trim()) return true;
+    const query = searchText.trim().toLowerCase();
+    const name = (item.name || '').toLowerCase();
+    const contact = (item.contact_number || '').toLowerCase();
+    // Strip non-digit chars for phone number search
+    const contactDigits = (item.contact_number || '').replace(/[^\d]/g, '');
+    const queryDigits = query.replace(/[^\d]/g, '');
+    return name.includes(query) || contact.includes(query) || contactDigits.includes(queryDigits);
   });
 
   // --- Real-time Stats Calculation (Strict Rule) ---
@@ -647,6 +658,16 @@ const SalesRecords = ({ isDarkMode }) => {
         title="Recent Records" 
         extra={
           <div className="flex items-center gap-3 no-print">
+            {/* Search Box */}
+            <Input.Search
+              placeholder="Search name, phone..."
+              allowClear
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              onSearch={(value) => setSearchText(value)}
+              style={{ width: 240 }}
+            />
+
             {/* Recycle Bin Toggle */}
             <Button
               icon={<DeleteOutlined />}
