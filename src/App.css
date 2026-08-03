@@ -115,3 +115,49 @@
 .ant-form-item {
   margin-bottom: 8px !important;
 }
+
+/* Client Tracking - Row Highlighting (Light) */
+.due-row td {
+  background: #fef2f2 !important;
+}
+.due-row:hover td {
+  background: #fee2e2 !important;
+}
+.due-row td:first-child {
+  border-left: 4px solid #ef4444 !important;
+}
+
+.lost-row td {
+  background: rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Client Tracking - Row Highlighting (Dark) */
+.due-row-dark td {
+  background: rgba(127, 29, 29, 0.30) !important;
+}
+.due-row-dark:hover td {
+  background: rgba(127, 29, 29, 0.40) !important;
+}
+.due-row-dark td:first-child {
+  border-left: 4px solid #f87171 !important;
+}
+
+.lost-row-dark td {
+  background: rgba(107, 114, 128, 0.08) !important;
+}
+
+/* Print overrides for Client Tracking */
+@media print {
+  .due-row td,
+  .due-row-dark td {
+    background: #ffffff !important;
+  }
+  .due-row td:first-child,
+  .due-row-dark td:first-child {
+    border-left: 2px solid #000000 !important;
+  }
+  .lost-row td,
+  .lost-row-dark td {
+    background: #ffffff !important;
+  }
+}
