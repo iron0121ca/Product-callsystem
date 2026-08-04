@@ -1,9 +1,12 @@
-import { useState, useEffect } from 'react';
-import { ConfigProvider, Layout, theme } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { ConfigProvider, theme, Layout } from 'antd';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import AppNavigation from './components/AppNavigation.jsx';
-import SalesRecords from './pages/SalesRecords.jsx';
-import ClientTracking from './pages/ClientTracking.jsx';
+
+import AppNavigation from './components/AppNavigation';
+import SalesRecords from './pages/SalesRecords';
+import ClientTracking from './pages/ClientTracking';
+
+import './App.css';
 
 const { Content } = Layout;
 
@@ -27,7 +30,12 @@ const App = () => {
   const { defaultAlgorithm, darkAlgorithm } = theme;
 
   return (
-    <ConfigProvider theme={{ algorithm: isDarkMode ? darkAlgorithm : defaultAlgorithm }}>
+    <ConfigProvider theme={{
+      algorithm: isDarkMode ? darkAlgorithm : defaultAlgorithm,
+      token: {
+        colorBorderSecondary: isDarkMode ? '#555555' : '#d0d0d0',
+      }
+    }}>
       <BrowserRouter>
         <Layout style={{ minHeight: '100vh', background: isDarkMode ? '#000' : '#f0f2f5' }}>
           <AppNavigation isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />

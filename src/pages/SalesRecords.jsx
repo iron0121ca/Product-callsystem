@@ -1,12 +1,31 @@
-import { useState, useEffect } from 'react';
-import { Form, Button, Select, message, Card, Table, Tag, Space, Popconfirm } from 'antd';
-import { PrinterOutlined, EditOutlined, PlusOutlined, SaveOutlined, CloseOutlined, DeleteOutlined, DownloadOutlined } from '@ant-design/icons';
+import React, { useState, useEffect } from 'react';
+import { 
+  Form, Button, Card, Table, Tag, Space, Popconfirm, Select, message, Input, DatePicker, TimePicker
+} from 'antd';
+import { 
+  PrinterOutlined, EditOutlined, PlusOutlined, 
+  SaveOutlined, CloseOutlined, DeleteOutlined,
+  DownloadOutlined
+} from '@ant-design/icons';
 import dayjs from 'dayjs';
 import * as XLSX from 'xlsx';
-import { supabase } from '../lib/supabase.js';
-import { formatPhoneNumber } from '../utils/formatters.js';
+import { supabase } from '../lib/supabase';
+import { formatPhoneNumber } from '../utils/formatters';
 
-export default function SalesRecords({ isDarkMode }) {
+const BENEFIT_OPTIONS = [
+  { value: 'mat', label: 'Mat' },
+  { value: 'trunk_tray', label: 'Trunk Tray' },
+  { value: 'window_tint', label: 'Window Tint' },
+  { value: 'door_visor', label: 'Door Visor' },
+  { value: 'cross_bar', label: 'Cross Bar' },
+  { value: 'roof_rail', label: 'Roof Rail' },
+  { value: 'dashcam', label: 'Dashcam' },
+  { value: 'engine_oil_1', label: 'Engine Oil x1' },
+  { value: 'engine_oil_2', label: 'Engine Oil x2' },
+  { value: 'engine_oil_3', label: 'Engine Oil x3' }
+];
+
+const SalesRecords = ({ isDarkMode }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [dataList, setDataList] = useState([]); // Store data list from DB
@@ -20,10 +39,9 @@ export default function SalesRecords({ isDarkMode }) {
   const [selectedYear, setSelectedYear] = useState(dayjs().year().toString());
   const [selectedMonth, setSelectedMonth] = useState((dayjs().month() + 1).toString());
   const [showRecycleBin, setShowRecycleBin] = useState(false);
+  const [searchText, setSearchText] = useState('');
 
   // --- UI Constants for Refactoring ---
-  const inputClasses = `h-9 px-3 border border-slate-200 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all`;
-  const selectClasses = `${inputClasses} pr-8`;
   const labelClasses = "text-[11px] font-semibold text-slate-500 ml-1 uppercase tracking-wider";
   const fieldWrapperClasses = "flex flex-col gap-1";
 
@@ -37,6 +55,22 @@ export default function SalesRecords({ isDarkMode }) {
     setIsEditing(true);
     setEditingId(record.id);
     
+    // Handle benefit multi-select data recovery
+    let benefitValues = [];
+    try {
+      if (record.benefit) {
+        // Try parsing as JSON array
+        if (record.benefit.startsWith('[') && record.benefit.endsWith(']')) {
+          benefitValues = JSON.parse(record.benefit);
+        } else {
+          // Fallback for old plain text data
+          benefitValues = [record.benefit];
+        }
+      }
+    } catch (e) {
+      benefitValues = record.benefit ? [record.benefit] : [];
+    }
+
     // Fill form with record data
     form.setFieldsValue({
       ...record,
@@ -46,6 +80,7 @@ export default function SalesRecords({ isDarkMode }) {
       date_of_buy: record.date_of_buy || null,
       date_delivery: record.date_delivery || null,
       delivery_time: record.delivery_time || null,
+      benefit: benefitValues,
     });
 
     // Scroll to top
@@ -62,8 +97,7 @@ export default function SalesRecords({ isDarkMode }) {
       month: (dayjs().month() + 1).toString(),
       year: dayjs().year().toString(),
       result: 'N/A',
-      benefit: 'N/A',
-      benefit_qty: 0,
+      benefit: [],
       type: 'Buy',
       car_type: 'New',
       date_of_buy: null,
@@ -147,6 +181,16 @@ export default function SalesRecords({ isDarkMode }) {
     const monthMatch = selectedMonth === 'all' || (deliveryDate.month() + 1).toString() === selectedMonth;
 
     return yearMatch && monthMatch;
+  }).filter(item => {
+    // Search filter: name, contact_number (phone)
+    if (!searchText.trim()) return true;
+    const query = searchText.trim().toLowerCase();
+    const name = (item.name || '').toLowerCase();
+    const contact = (item.contact_number || '').toLowerCase();
+    // Strip non-digit chars for phone number search
+    const contactDigits = (item.contact_number || '').replace(/[^\d]/g, '');
+    const queryDigits = query.replace(/[^\d]/g, '');
+    return name.includes(query) || contact.includes(query) || contactDigits.includes(queryDigits);
   });
 
   // --- Real-time Stats Calculation (Strict Rule) ---
@@ -224,8 +268,7 @@ export default function SalesRecords({ isDarkMode }) {
         date_delivery: values.date_delivery ? (dayjs.isDayjs(values.date_delivery) ? values.date_delivery.format('YYYY-MM-DD') : values.date_delivery) : null,
         delivery_time: values.delivery_time ? (dayjs.isDayjs(values.delivery_time) ? values.delivery_time.format('HH:mm:ss') : values.delivery_time) : null,
         result: values.result,
-        benefit: values.benefit,
-        benefit_qty: parseInt(values.benefit_qty || 0),
+        benefit: JSON.stringify(values.benefit || []),
         part_incentive: values.part_incentive,
       };
 
@@ -313,8 +356,37 @@ export default function SalesRecords({ isDarkMode }) {
     { title: 'Purchase Date', dataIndex: 'date_of_buy', key: 'date_of_buy' },
     { title: 'Delivery Date', dataIndex: 'date_delivery', key: 'date_delivery' },
     { title: 'Status', dataIndex: 'result', key: 'result' },
-    { title: 'Benefit', dataIndex: 'benefit', key: 'benefit' },
-    { title: 'Qty', dataIndex: 'benefit_qty', key: 'benefit_qty' },
+    { 
+      title: 'Benefit', 
+      dataIndex: 'benefit', 
+      key: 'benefit',
+      render: (text) => {
+        if (!text || text === 'N/A') return '-';
+        
+        let benefitList = [];
+        try {
+          if (text.startsWith('[') && text.endsWith(']')) {
+            benefitList = JSON.parse(text);
+          } else {
+            benefitList = [text];
+          }
+        } catch (e) {
+          benefitList = [text];
+        }
+
+        if (benefitList.length === 0) return '-';
+
+        return (
+          <Space size={[0, 4]} wrap>
+            {benefitList.map((val) => {
+              const option = BENEFIT_OPTIONS.find(opt => opt.value === val);
+              const label = option ? option.label : val;
+              return <Tag color="blue" key={val}>{label}</Tag>;
+            })}
+          </Space>
+        );
+      }
+    },
     { title: 'Remarks', dataIndex: 'part_incentive', key: 'part_incentive', width: 200 },
     {
       title: 'Action',
@@ -365,7 +437,7 @@ export default function SalesRecords({ isDarkMode }) {
             fontWeight: 'bold',
             fontFamily: "'Roboto', sans-serif" 
           }}>
-            {isEditing ? "Edit Sale Record" : "Sales Entry"}
+            {isEditing ? "Edit Sale Record" : "Sales Records"}
           </h2>
 
           {/* Dynamic Stats Badge - Positioned at far right */}
@@ -401,21 +473,15 @@ export default function SalesRecords({ isDarkMode }) {
             car_type: 'New',
             year: dayjs().year().toString(),
             result: 'N/A',
-            benefit: 'N/A',
-            benefit_qty: 0,
+            benefit: [],
           }}
-          size="small"
         >
           <div className="flex flex-wrap items-end gap-3 mb-6">
             {/* Annual */}
             <div className={fieldWrapperClasses}>
               <label className={labelClasses}>Annual</label>
               <Form.Item name="annual_year" rules={[{ required: true }]} noStyle>
-                <select className={`${selectClasses} w-24`}>
-                  {annualYearOptions.filter(opt => opt.value !== 'all').map(opt => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
+                <Select className="w-24" options={annualYearOptions.filter(opt => opt.value !== 'all')} />
               </Form.Item>
             </div>
 
@@ -423,11 +489,7 @@ export default function SalesRecords({ isDarkMode }) {
             <div className={fieldWrapperClasses}>
               <label className={labelClasses}>Month</label>
               <Form.Item name="month" rules={[{ required: true }]} noStyle>
-                <select className={`${selectClasses} w-24`}>
-                  {monthOptions.map(opt => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
+                <Select className="w-24" options={monthOptions} />
               </Form.Item>
             </div>
 
@@ -435,10 +497,10 @@ export default function SalesRecords({ isDarkMode }) {
             <div className={fieldWrapperClasses}>
               <label className={labelClasses}>Type</label>
               <Form.Item name="type" rules={[{ required: true }]} noStyle>
-                <select className={`${selectClasses} w-24`}>
-                  <option value="Buy">Buy</option>
-                  <option value="Sell">Sell</option>
-                </select>
+                <Select className="w-24">
+                  <Select.Option value="Buy">Buy</Select.Option>
+                  <Select.Option value="Sell">Sell</Select.Option>
+                </Select>
               </Form.Item>
             </div>
 
@@ -446,10 +508,10 @@ export default function SalesRecords({ isDarkMode }) {
             <div className={fieldWrapperClasses}>
               <label className={labelClasses}>Condition</label>
               <Form.Item name="car_type" rules={[{ required: true }]} noStyle>
-                <select className={`${selectClasses} w-24`}>
-                  <option value="New">New</option>
-                  <option value="Used">Used</option>
-                </select>
+                <Select className="w-24">
+                  <Select.Option value="New">New</Select.Option>
+                  <Select.Option value="Used">Used</Select.Option>
+                </Select>
               </Form.Item>
             </div>
 
@@ -457,7 +519,7 @@ export default function SalesRecords({ isDarkMode }) {
             <div className={fieldWrapperClasses}>
               <label className={labelClasses}>Stock#</label>
               <Form.Item name="stock_number" rules={[{ required: true }]} noStyle>
-                <input type="text" className={`${inputClasses} w-28`} placeholder="H25XXX" />
+                <Input className="w-28" placeholder="H25XXX" />
               </Form.Item>
             </div>
 
@@ -465,7 +527,7 @@ export default function SalesRecords({ isDarkMode }) {
             <div className={fieldWrapperClasses}>
               <label className={labelClasses}>Customer Name</label>
               <Form.Item name="name" rules={[{ required: true }]} noStyle>
-                <input type="text" className={`${inputClasses} w-44`} placeholder="e.g. Ming Lo Kim" />
+                <Input className="w-44" placeholder="e.g. Ming Lo Kim" />
               </Form.Item>
             </div>
 
@@ -473,7 +535,7 @@ export default function SalesRecords({ isDarkMode }) {
             <div className={fieldWrapperClasses}>
               <label className={labelClasses}>Contact</label>
               <Form.Item name="contact_number" noStyle>
-                <input type="text" className={`${inputClasses} w-36`} placeholder="(604) 783-6903" onChange={handleContactChange} />
+                <Input className="w-36" placeholder="(604) 783-6903" onChange={handleContactChange} />
               </Form.Item>
             </div>
 
@@ -481,11 +543,7 @@ export default function SalesRecords({ isDarkMode }) {
             <div className={fieldWrapperClasses}>
               <label className={labelClasses}>Year</label>
               <Form.Item name="year" noStyle>
-                <select className={`${selectClasses} w-24`}>
-                  {yearOptions.map(opt => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
+                <Select className="w-24" options={yearOptions} />
               </Form.Item>
             </div>
 
@@ -493,7 +551,7 @@ export default function SalesRecords({ isDarkMode }) {
             <div className={fieldWrapperClasses}>
               <label className={labelClasses}>Brand</label>
               <Form.Item name="brand" noStyle>
-                <input type="text" className={`${inputClasses} w-28`} placeholder="Honda" />
+                <Input className="w-28" placeholder="Honda" />
               </Form.Item>
             </div>
 
@@ -501,7 +559,7 @@ export default function SalesRecords({ isDarkMode }) {
             <div className={fieldWrapperClasses}>
               <label className={labelClasses}>Model</label>
               <Form.Item name="model" noStyle>
-                <input type="text" className={`${inputClasses} w-28`} placeholder="Civic" />
+                <Input className="w-28" placeholder="Civic" />
               </Form.Item>
             </div>
 
@@ -509,7 +567,7 @@ export default function SalesRecords({ isDarkMode }) {
             <div className={fieldWrapperClasses}>
               <label className={labelClasses}>Color</label>
               <Form.Item name="color" noStyle>
-                <input type="text" className={`${inputClasses} w-24`} placeholder="Red" />
+                <Input className="w-24" placeholder="Red" />
               </Form.Item>
             </div>
 
@@ -517,7 +575,7 @@ export default function SalesRecords({ isDarkMode }) {
             <div className={fieldWrapperClasses}>
               <label className={labelClasses}>Buy Date</label>
               <Form.Item name="date_of_buy" noStyle>
-                <input type="date" className={`${inputClasses} w-36`} />
+                <Input type="date" className="w-36" />
               </Form.Item>
             </div>
 
@@ -525,7 +583,7 @@ export default function SalesRecords({ isDarkMode }) {
             <div className={fieldWrapperClasses}>
               <label className={labelClasses}>Deliv. Date</label>
               <Form.Item name="date_delivery" noStyle>
-                <input type="date" className={`${inputClasses} w-36`} />
+                <Input type="date" className="w-36" />
               </Form.Item>
             </div>
 
@@ -533,7 +591,7 @@ export default function SalesRecords({ isDarkMode }) {
             <div className={fieldWrapperClasses}>
               <label className={labelClasses}>Deliv. Time</label>
               <Form.Item name="delivery_time" noStyle>
-                <input type="time" className={`${inputClasses} w-28`} />
+                <Input type="time" className="w-28" />
               </Form.Item>
             </div>
 
@@ -541,13 +599,13 @@ export default function SalesRecords({ isDarkMode }) {
             <div className={fieldWrapperClasses}>
               <label className={labelClasses}>Status</label>
               <Form.Item name="result" noStyle>
-                <select className={`${selectClasses} w-32`}>
-                  <option value="N/A">N/A</option>
-                  <option value="Gas Full">Gas Full</option>
-                  <option value="Cleaned">Cleaned</option>
-                  <option value="Delivered">Delivered</option>
-                  <option value="Canceled">Canceled</option>
-                </select>
+                <Select className="w-32">
+                  <Select.Option value="N/A">N/A</Select.Option>
+                  <Select.Option value="Gas Full">Gas Full</Select.Option>
+                  <Select.Option value="Cleaned">Cleaned</Select.Option>
+                  <Select.Option value="Delivered">Delivered</Select.Option>
+                  <Select.Option value="Canceled">Canceled</Select.Option>
+                </Select>
               </Form.Item>
             </div>
 
@@ -555,24 +613,13 @@ export default function SalesRecords({ isDarkMode }) {
             <div className={fieldWrapperClasses}>
               <label className={labelClasses}>Benefit</label>
               <Form.Item name="benefit" noStyle>
-                <select className={`${selectClasses} w-44`}>
-                  <option value="N/A">N/A</option>
-                  <option value="All season mat">All season mat</option>
-                  <option value="Trunk tray">Trunk tray</option>
-                  <option value="Oil change service">Oil change service</option>
-                </select>
-              </Form.Item>
-            </div>
-
-            {/* Benefit Qty */}
-            <div className={fieldWrapperClasses}>
-              <label className={labelClasses}>Qty</label>
-              <Form.Item name="benefit_qty" noStyle>
-                <select className={`${selectClasses} w-20`}>
-                  {Array.from({ length: 11 }, (_, i) => (
-                    <option key={i} value={i}>{i}</option>
-                  ))}
-                </select>
+                <Select 
+                  mode="multiple" 
+                  options={BENEFIT_OPTIONS} 
+                  placeholder="Select"
+                  className="w-44"
+                  maxTagCount="responsive"
+                />
               </Form.Item>
             </div>
 
@@ -580,7 +627,7 @@ export default function SalesRecords({ isDarkMode }) {
             <div className={fieldWrapperClasses}>
               <label className={labelClasses}>Remarks</label>
               <Form.Item name="part_incentive" noStyle>
-                <input type="text" className={`${inputClasses} w-48`} placeholder="Notes..." />
+                <Input className="w-[560px]" placeholder="Notes..." />
               </Form.Item>
             </div>
           </div>
@@ -611,6 +658,16 @@ export default function SalesRecords({ isDarkMode }) {
         title="Recent Records" 
         extra={
           <div className="flex items-center gap-3 no-print">
+            {/* Search Box */}
+            <Input.Search
+              placeholder="Search name, phone..."
+              allowClear
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              onSearch={(value) => setSearchText(value)}
+              style={{ width: 240 }}
+            />
+
             {/* Recycle Bin Toggle */}
             <Button
               icon={<DeleteOutlined />}
@@ -657,8 +714,8 @@ export default function SalesRecords({ isDarkMode }) {
             </Space>
           </div>
         }
-        variant="outlined" 
-        styles={{ body: { padding: 0 } }}
+        variant="outlined"
+        styles={{ body: { padding: 0 }, header: { textAlign: 'left' } }}
         style={{ width: '100%' }}
       >
         <div style={{ width: '100%', overflowX: 'auto' }}>
@@ -685,4 +742,6 @@ export default function SalesRecords({ isDarkMode }) {
       </Card>
     </>
   );
-}
+};
+
+export default SalesRecords;

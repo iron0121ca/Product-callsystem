@@ -1,10 +1,11 @@
+import React from 'react';
 import { Layout, Menu, Space, Switch } from 'antd';
 import { HomeOutlined, UserAddOutlined, SunOutlined, MoonOutlined } from '@ant-design/icons';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const { Header } = Layout;
 
-export default function AppNavigation({ isDarkMode, setIsDarkMode }) {
+const AppNavigation = ({ isDarkMode, setIsDarkMode }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -60,4 +61,6 @@ export default function AppNavigation({ isDarkMode, setIsDarkMode }) {
       </Space>
     </Header>
   );
-}
+};
+
+export default AppNavigation;
