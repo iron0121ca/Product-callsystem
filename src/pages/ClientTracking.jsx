@@ -1,13 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import dayjs from 'dayjs';
-import { Trash2, Pencil } from 'lucide-react';
+import { Trash2, Pencil, Search, FileSpreadsheet, Printer } from 'lucide-react';
 import { supabase } from '../lib/supabase.js';
 import { formatPhoneNumber } from '../utils/formatters.js';
+import * as XLSX from 'xlsx';
 
 export default function ClientTracking({ isDarkMode }) {
   const [loading, setLoading] = useState(false);
   const [dataList, setDataList] = useState([]);
   const [tableLoading, setTableLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Edit Mode State
   const [isEditing, setIsEditing] = useState(false);
@@ -53,6 +55,42 @@ export default function ClientTracking({ isDarkMode }) {
   useEffect(() => {
     fetchData();
   }, []);
+
+  // Filter Logic
+  const filteredData = useMemo(() => {
+    if (!searchTerm.trim()) return dataList;
+    return dataList.filter(item =>
+      item.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.vehicle_brand?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.phone_number?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [dataList, searchTerm]);
+
+  // --- Export Excel Logic ---
+  const handleExportExcel = () => {
+    const exportData = filteredData.map(item => ({
+      'First Name': item.first_name,
+      'Last Name': item.last_name,
+      'Phone Number': item.phone_number,
+      'Email': item.email,
+      'Vehicle Brand': item.vehicle_brand,
+      'Condition': item.condition,
+      'Budget Amount': isNaN(item.budget_amount) ? item.budget_amount : `$${Number(item.budget_amount || 0).toLocaleString()}`,
+      'Currently Vehicle': item.currently_vehicle,
+      'Lien': item.lien,
+      'Status': item.status,
+      'Buy Vehicle Date': item.buy_vehicle_date ? dayjs(item.buy_vehicle_date).format('MM/DD/YYYY') : '',
+      'Lead Following': item.lead_following ? dayjs(item.lead_following).format('MM/DD/YYYY') : '',
+      'Memo': item.memo,
+      'Created At': item.created_at ? dayjs(item.created_at).format('MMM DD, HH:mm') : '',
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'ClientTracking');
+    XLSX.writeFile(workbook, `client_tracking_${dayjs().format('YYYY-MM-DD_HH-mm')}.xlsx`);
+  };
 
   // Handlers
   const handleInputChange = (e) => {
@@ -284,8 +322,34 @@ export default function ClientTracking({ isDarkMode }) {
 
         {/* Data Table Card */}
         <div className={`${themeClasses.card} rounded-lg border shadow-sm overflow-hidden`}>
-          <div className={`px-6 py-4 border-b ${isDarkMode ? 'border-[#333]' : 'border-gray-100'} flex justify-between items-center`}>
+          <div className={`px-6 py-4 border-b ${isDarkMode ? 'border-[#333]' : 'border-gray-100'} flex flex-wrap items-center justify-between gap-3`}>
             <h2 className={`text-lg font-bold ${themeClasses.text}`}>Recent Records</h2>
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                <input
+                  type="text"
+                  placeholder="Search by name, vehicle or phone..."
+                  className={`pl-9 pr-4 py-2 ${themeClasses.input} border rounded-lg outline-none transition-all text-sm w-64`}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <button
+                onClick={handleExportExcel}
+                className={`flex items-center gap-1.5 px-3 py-2 ${isDarkMode ? 'bg-[#1f1f1f] border-[#434343] text-[#fff] hover:bg-[#2a2a2a]' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'} border rounded-lg text-sm font-medium transition-all`}
+              >
+                <FileSpreadsheet size={16} />
+                Export Excel
+              </button>
+              <button
+                onClick={() => window.print()}
+                className={`flex items-center gap-1.5 px-3 py-2 ${isDarkMode ? 'bg-[#1f1f1f] border-[#434343] text-[#fff] hover:bg-[#2a2a2a]' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'} border rounded-lg text-sm font-medium transition-all`}
+              >
+                <Printer size={16} />
+                Print List
+              </button>
+            </div>
           </div>
           <div className="w-full overflow-x-auto">
             <table className="w-full text-sm text-left border-collapse">
@@ -307,10 +371,10 @@ export default function ClientTracking({ isDarkMode }) {
               <tbody className={`divide-y ${isDarkMode ? 'divide-[#333]' : 'divide-gray-100'}`}>
                 {tableLoading ? (
                   <tr><td colSpan="11" className={`text-center py-10 ${themeClasses.secondaryText}`}>Loading leads...</td></tr>
-                ) : dataList.length === 0 ? (
+                ) : filteredData.length === 0 ? (
                   <tr><td colSpan="11" className={`text-center py-10 ${themeClasses.secondaryText}`}>No records found.</td></tr>
                 ) : (
-                  dataList.map((item) => {
+                  filteredData.map((item) => {
                     // --- Status Logic ---
                     const isLost = item.status === 'Lost';
                     const isSold = item.status === 'Sold';

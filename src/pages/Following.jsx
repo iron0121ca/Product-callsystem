@@ -1,17 +1,20 @@
 import { useState, useEffect, useMemo } from 'react';
-import { 
-  Search, 
-  UserPlus, 
-  Phone, 
-  Mail, 
-  Calendar, 
-  DollarSign, 
-  Clock, 
+import {
+  Search,
+  UserPlus,
+  Phone,
+  Mail,
+  Calendar,
+  DollarSign,
+  Clock,
   MoreVertical,
+  FileSpreadsheet,
+  Printer,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase.js';
 import { formatPhoneNumber } from '../utils/formatters.js';
 import dayjs from 'dayjs';
+import * as XLSX from 'xlsx';
 
 const Following = () => {
   const [customers, setCustomers] = useState([]);
@@ -71,7 +74,7 @@ const Following = () => {
     const { error } = await supabase
       .from('potential_customers')
       .insert([formData]);
-    
+
     if (error) {
       alert('Operation failed: ' + error.message);
       return;
@@ -86,6 +89,29 @@ const Following = () => {
       expected_buying_time: 'Within 1 Month', current_car: '',
       next_followup_date: dayjs().add(3, 'day').format('YYYY-MM-DD'), remarks: ''
     });
+  };
+
+  // --- Export Excel Logic ---
+  const handleExportExcel = () => {
+    const exportData = filteredCustomers.map(item => ({
+      'Customer Name': item.customer_name,
+      'Contact Number': item.contact_number,
+      'Email': item.email,
+      'Condition': item.condition,
+      'Desired Vehicle': item.desired_vehicle,
+      'Current Car': item.current_car,
+      'Budget Type': item.budget_type,
+      'Budget Amount': Number(item.budget_amount).toLocaleString(),
+      'Buying Timeframe': item.expected_buying_time,
+      'Next Follow-up Date': dayjs(item.next_followup_date).format('MMM DD, YYYY'),
+      'Remarks': item.remarks,
+      'Created At': dayjs(item.created_at).format('MMM DD, YYYY'),
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'FollowingLeads');
+    XLSX.writeFile(workbook, `following_leads_${dayjs().format('YYYY-MM-DD_HH-mm')}.xlsx`);
   };
 
   return (
@@ -110,7 +136,7 @@ const Following = () => {
         <div className="flex gap-4 mb-6">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-            <input 
+            <input
               type="text"
               placeholder="Search by name or vehicle..."
               className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
@@ -118,6 +144,20 @@ const Following = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
+          <button
+            onClick={handleExportExcel}
+            className="flex items-center gap-2 px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all"
+          >
+            <FileSpreadsheet size={18} />
+            Export Excel
+          </button>
+          <button
+            onClick={() => window.print()}
+            className="flex items-center gap-2 px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all"
+          >
+            <Printer size={18} />
+            Print List
+          </button>
         </div>
 
         {/* Table Area */}
