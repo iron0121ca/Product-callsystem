@@ -18,6 +18,7 @@ const App = () => {
 
   useEffect(() => {
     localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+    document.body.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
     if (isDarkMode) {
       document.body.style.backgroundColor = '#000';
       document.body.style.color = '#fff';
