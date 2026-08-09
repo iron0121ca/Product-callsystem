@@ -74,7 +74,8 @@ const ClientTracking = ({ isDarkMode }) => {
       currently_vehicle: record.currently_vehicle || '',
       lien: record.lien || 'Cash',
       status: record.status || 'In progress',
-      appointment_date: record.appointment_date || null,
+      appointment_date: record.appointment_date ? dayjs(record.appointment_date).format('YYYY-MM-DD') : null,
+      appointment_time: record.appointment_date ? dayjs(record.appointment_date).format('HH:mm') : null,
       lead_following: record.lead_following || null,
       memo: record.memo || ''
     });
@@ -92,6 +93,7 @@ const ClientTracking = ({ isDarkMode }) => {
       lien: 'Cash',
       status: 'In progress',
       lead_following: dayjs().add(3, 'day').format('YYYY-MM-DD'),
+      appointment_time: null,
     });
   };
 
@@ -136,7 +138,7 @@ const ClientTracking = ({ isDarkMode }) => {
       'Currently Vehicle': item.currently_vehicle,
       'Lien': item.lien,
       'Status': item.status,
-      'Appointment Date': item.appointment_date ? dayjs(item.appointment_date).format('MM/DD/YYYY') : '',
+      'Appointment Date': item.appointment_date ? dayjs(item.appointment_date).format('MM/DD/YYYY HH:mm') : '',
       'Lead Following': item.lead_following ? dayjs(item.lead_following).format('MM/DD/YYYY') : '',
       'Memo': item.memo,
       'Created At': item.created_at ? dayjs(item.created_at).format('MMM DD, HH:mm') : '',
@@ -163,7 +165,11 @@ const ClientTracking = ({ isDarkMode }) => {
         currently_vehicle: values.currently_vehicle,
         lien: values.lien,
         status: values.status,
-        appointment_date: values.appointment_date || null,
+        appointment_date: values.appointment_date
+          ? (values.appointment_time
+              ? `${values.appointment_date} ${values.appointment_time}:00`
+              : `${values.appointment_date} 00:00:00`)
+          : null,
         lead_following: values.lead_following || null,
         memo: values.memo,
       };
@@ -324,7 +330,7 @@ const ClientTracking = ({ isDarkMode }) => {
       dataIndex: 'appointment_date',
       key: 'appointment_date',
       width: 120,
-      render: (text) => text ? dayjs(text).format('MM/DD/YYYY') : '-'
+      render: (text) => text ? dayjs(text).format('MM/DD/YYYY HH:mm') : '-'
     },
     {
       title: 'Lead Following',
@@ -539,9 +545,14 @@ const ClientTracking = ({ isDarkMode }) => {
             {/* Appointment Date */}
             <div className={fieldWrapperClasses}>
               <label className={labelClasses}>Appt. Date</label>
-              <Form.Item name="appointment_date" noStyle>
-                <Input type="date" className="w-36" />
-              </Form.Item>
+              <div className="flex gap-1">
+                <Form.Item name="appointment_date" noStyle>
+                  <Input type="date" className="w-32" />
+                </Form.Item>
+                <Form.Item name="appointment_time" noStyle>
+                  <Input type="time" className="w-20" />
+                </Form.Item>
+              </div>
             </div>
 
             {/* Lead Following */}
