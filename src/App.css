@@ -116,6 +116,13 @@
   margin-bottom: 8px !important;
 }
 
+/* Sales Records table: force columns to auto-size to their content */
+.sales-records-table .ant-table {
+  table-layout: auto !important;
+  width: max-content !important;
+  min-width: 0 !important;
+}
+
 /* Client Tracking - Row Highlighting (Light) */
 .due-row td {
   background: #fef2f2 !important;

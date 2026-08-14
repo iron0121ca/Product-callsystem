@@ -391,7 +391,6 @@ const SalesRecords = ({ isDarkMode }) => {
     {
       title: 'Action',
       key: 'action',
-      fixed: 'right',
       className: 'no-print',
       render: (_, record) => (
         <Space size="middle">
@@ -719,8 +718,9 @@ const SalesRecords = ({ isDarkMode }) => {
         style={{ width: '100%' }}
       >
         <div style={{ width: '100%', overflowX: 'auto' }}>
-          <Table 
-            dataSource={filteredData} 
+          <Table
+            className="sales-records-table"
+            dataSource={filteredData}
             columns={columns.map(col => ({
               ...col,
               onCell: () => ({
