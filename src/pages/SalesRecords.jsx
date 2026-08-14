@@ -307,9 +307,9 @@ const SalesRecords = ({ isDarkMode }) => {
       key: 'annual_year',
       render: (text) => <Tag color="blue">{text}</Tag>
     },
-    { 
-      title: 'Month', 
-      dataIndex: 'month', 
+    {
+      title: 'MM',
+      dataIndex: 'month',
       key: 'month',
       sorter: (a, b) => b.month - a.month,
       render: (value) => {
@@ -387,7 +387,7 @@ const SalesRecords = ({ isDarkMode }) => {
         );
       }
     },
-    { title: 'Remarks', dataIndex: 'part_incentive', key: 'part_incentive', width: 200 },
+    { title: 'Remarks', dataIndex: 'part_incentive', key: 'part_incentive' },
     {
       title: 'Action',
       key: 'action',
@@ -734,6 +734,7 @@ const SalesRecords = ({ isDarkMode }) => {
             loading={tableLoading}
             pagination={{ pageSize: 20 }}
             size="small"
+            tableLayout="auto"
             bordered
             sticky
             scroll={{ x: 'max-content' }}
