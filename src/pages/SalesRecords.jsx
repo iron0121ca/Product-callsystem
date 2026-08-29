@@ -328,6 +328,7 @@ const SalesRecords = ({ isDarkMode }) => {
         if (typeValue === 'Sell') {
           if (record.result === 'N/A') color = 'red';
           else if (record.result === 'Gas Full') color = 'gold';
+          else if (record.result === 'Cleaned') color = 'gold';
           else if (record.result === 'Delivered') color = 'green';
           else color = 'green';
         } else if (typeValue === 'Buy') {
