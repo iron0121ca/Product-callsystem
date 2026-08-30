@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Form, Button, Card, Table, Tag, Space, Popconfirm, Select, message, Input
 } from 'antd';
@@ -22,6 +22,13 @@ const ClientTracking = ({ isDarkMode }) => {
   const [dataList, setDataList] = useState([]);
   const [tableLoading, setTableLoading] = useState(false);
   const [searchText, setSearchText] = useState('');
+
+  // --- Locked Table Layout ---
+  // Keeps the page (Recent Records header + column header row) fixed in the
+  // viewport; only the table body scrolls up/down.
+  const [tableScrollY, setTableScrollY] = useState(400);
+  const aboveRef = useRef(null);
+  const tableAreaRef = useRef(null);
 
   // --- Edit Mode State ---
   const [isEditing, setIsEditing] = useState(false);
@@ -56,6 +63,46 @@ const ClientTracking = ({ isDarkMode }) => {
 
   useEffect(() => {
     fetchData();
+  }, []);
+
+  // --- Locked Table Layout ---
+  // Size the table's internal scroll area so the whole page fits in the
+  // viewport: the Recent Records card header and the table's column header
+  // row stay locked, and only the data rows scroll up/down.
+  useEffect(() => {
+    const tableArea = tableAreaRef.current;
+    if (!tableArea) return;
+
+    const updateTableHeight = () => {
+      const rect = tableArea.getBoundingClientRect();
+      const thead = tableArea.querySelector('.ant-table-thead');
+      const pagination = tableArea.querySelector('.ant-pagination');
+      let chromeHeight = thead ? thead.offsetHeight : 39;
+      if (pagination) {
+        // Include the pagination's own margins (antd v6 renders it
+        // directly in the container with 16px top/bottom margins)
+        const cs = window.getComputedStyle(pagination);
+        chromeHeight +=
+          pagination.offsetHeight +
+          parseFloat(cs.marginTop) +
+          parseFloat(cs.marginBottom);
+      }
+      // 10px = Layout Content bottom padding (8px) + card bottom border
+      const available = window.innerHeight - rect.top - chromeHeight - 10;
+      setTableScrollY(Math.max(available, 200));
+    };
+
+    updateTableHeight();
+
+    const resizeObserver = new ResizeObserver(updateTableHeight);
+    if (aboveRef.current) resizeObserver.observe(aboveRef.current);
+    resizeObserver.observe(tableArea);
+    window.addEventListener('resize', updateTableHeight);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', updateTableHeight);
+    };
   }, []);
 
   // --- Edit Mode Trigger ---
@@ -409,6 +456,7 @@ const ClientTracking = ({ isDarkMode }) => {
 
   return (
     <>
+      <div ref={aboveRef}>
       {/* Page Title */}
       <div style={{
         display: 'flex',
@@ -592,6 +640,7 @@ const ClientTracking = ({ isDarkMode }) => {
           </Form.Item>
         </Form>
       </Card>
+      </div>
 
       {/* Bottom Section: Data Table */}
       <Card
@@ -621,10 +670,21 @@ const ClientTracking = ({ isDarkMode }) => {
           </div>
         }
         variant="outlined"
-        styles={{ body: { padding: 0 }, header: { textAlign: 'left' } }}
+        styles={{
+          body: { padding: 0 },
+          header: {
+            textAlign: 'left',
+            // Lock the "Recent Records" bar below the sticky app header so it
+            // stays visible even if the window is too short to fit everything
+            position: 'sticky',
+            top: 48,
+            zIndex: 50,
+            background: isDarkMode ? '#141414' : '#fff',
+          },
+        }}
         style={{ width: '100%' }}
       >
-        <div style={{ width: '100%', overflowX: 'auto' }}>
+        <div ref={tableAreaRef} style={{ width: '100%', overflowX: 'auto' }}>
           <Table
             dataSource={dataList.filter(item => {
               if (!searchText.trim()) return true;
@@ -656,7 +716,7 @@ const ClientTracking = ({ isDarkMode }) => {
             size="small"
             bordered
             sticky
-            scroll={{ x: 'max-content' }}
+            scroll={{ x: 'max-content', y: tableScrollY }}
             rowClassName={(record) => {
               const cleanLead = record.lead_following ? record.lead_following.split(' ')[0].split('T')[0] : '';
               const todayStr = dayjs().format('YYYY-MM-DD');

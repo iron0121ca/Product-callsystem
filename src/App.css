@@ -35,6 +35,16 @@
     overflow: visible !important;
   }
 
+  /* Unlock the table's internal vertical scroll (locked header layout)
+     so every row prints */
+  .ant-table-body {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  .ant-table-sticky-holder {
+    position: static !important;
+  }
+
   /* ===== CRITICAL: Force black text for clear printing ===== */
   /* Override all text to pure black on white paper */
   * {
