@@ -15,6 +15,7 @@ import { formatPhoneNumber } from '../utils/formatters';
 const CONDITION_OPTIONS = ['New', 'Used', 'Any'];
 const LIEN_OPTIONS = ['Cash', 'Lease', 'Finance'];
 const STATUS_OPTIONS = ['In progress', 'Contacted', 'Appointment', 'Sold', 'Lost', 'Cancelled'];
+const SOURCE_OPTIONS = ['Phone', 'Walkin', 'FB', 'Autoalert', 'CRM'];
 
 const ClientTracking = ({ isDarkMode }) => {
   const [form] = Form.useForm();
@@ -111,6 +112,7 @@ const ClientTracking = ({ isDarkMode }) => {
     setEditingId(record.id);
 
     form.setFieldsValue({
+      source: record.source || null,
       first_name: record.first_name || '',
       last_name: record.last_name || '',
       phone_number: record.phone_number || '',
@@ -136,6 +138,7 @@ const ClientTracking = ({ isDarkMode }) => {
     form.resetFields();
     // Restore defaults
     form.setFieldsValue({
+      source: null,
       condition: 'Any',
       lien: 'Cash',
       status: 'In progress',
@@ -175,6 +178,7 @@ const ClientTracking = ({ isDarkMode }) => {
     });
 
     const exportData = filteredData.map(item => ({
+      'Source': item.source,
       'First Name': item.first_name,
       'Last Name': item.last_name,
       'Phone Number': item.phone_number,
@@ -202,6 +206,7 @@ const ClientTracking = ({ isDarkMode }) => {
     setLoading(true);
     try {
       const dataToSubmit = {
+        source: values.source || null,
         first_name: values.first_name,
         last_name: values.last_name,
         phone_number: values.phone_number,
@@ -288,6 +293,15 @@ const ClientTracking = ({ isDarkMode }) => {
           </Tag>
         );
       }
+    },
+    {
+      title: 'Source',
+      dataIndex: 'source',
+      key: 'source',
+      width: 110,
+      render: (text) => text
+        ? <Tag color="geekblue" className="font-bold uppercase text-[10px]">{text}</Tag>
+        : <span className="text-xs text-gray-400">-</span>
     },
     {
       title: 'Name',
@@ -498,6 +512,18 @@ const ClientTracking = ({ isDarkMode }) => {
           }}
         >
           <div className="flex flex-wrap items-end gap-3 mb-6">
+            {/* Source */}
+            <div className={fieldWrapperClasses}>
+              <label className={labelClasses}>Source</label>
+              <Form.Item name="source" noStyle>
+                <Select className="w-32" placeholder="Select" allowClear>
+                  {SOURCE_OPTIONS.map(opt => (
+                    <Select.Option key={opt} value={opt}>{opt}</Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </div>
+
             {/* First Name */}
             <div className={fieldWrapperClasses}>
               <label className={labelClasses}>First Name</label>
